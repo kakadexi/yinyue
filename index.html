@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>卡卡的西 · 清新玻璃</title>
+    <title>卡卡的西 · 灵动玻璃</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -14,32 +14,32 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
         }
         body {
-            background: linear-gradient(145deg, #e0eafc 0%, #cfdef3 100%);
+            background: linear-gradient(135deg, #e2f0ff 0%, #d4e4fc 100%);
             min-height: 100vh;
             position: relative;
         }
-        /* 通透毛玻璃卡片 */
-        .glass-clear {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+        /* 加强版通透毛玻璃 */
+        .glass-premium {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
             border-radius: 36px;
-            border: 0.5px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(255, 255, 255, 0.4) inset;
+            border: 0.5px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(255, 255, 255, 0.5) inset;
             transition: all 0.3s ease;
         }
-        .glass-clear:hover {
-            background: rgba(255, 255, 255, 0.55);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        .glass-premium:hover {
+            background: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
         }
         /* 分段控制器 */
-        .segmented-soft {
-            background: rgba(255, 255, 255, 0.5);
+        .segmented-glass {
+            background: rgba(255, 255, 255, 0.55);
             border-radius: 60px;
             padding: 3px;
             backdrop-filter: blur(10px);
         }
-        .segment-soft {
+        .segment-glass {
             padding: 6px 20px;
             border-radius: 60px;
             font-size: 0.85rem;
@@ -49,7 +49,7 @@
             transition: 0.2s;
             cursor: pointer;
         }
-        .segment-soft-active {
+        .segment-glass-active {
             background: #ffffff;
             color: #1e2a3a;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -60,11 +60,11 @@
             cursor: pointer;
         }
         .song-row:active {
-            background: rgba(0, 0, 0, 0.03);
+            background: rgba(0, 0, 0, 0.02);
             transform: scale(0.99);
         }
         .playing-highlight {
-            background: rgba(100, 150, 250, 0.15);
+            background: rgba(100, 150, 250, 0.12);
             border-left: 3px solid #5e9bff;
         }
         /* 控制按钮 */
@@ -72,31 +72,31 @@
             width: 46px;
             height: 46px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: 0.2s;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
             color: #2c3e50;
         }
         .ctrl-btn:active {
             transform: scale(0.94);
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
         }
         .play-btn {
             background: #5e9bff;
             color: white;
-            box-shadow: 0 4px 12px rgba(94, 155, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(94, 155, 255, 0.25);
         }
         .play-btn:active {
             background: #3e7bdd;
         }
         /* 标签 */
-        .tag-soft {
-            background: rgba(255, 255, 255, 0.5);
+        .tag-glass {
+            background: rgba(255, 255, 255, 0.55);
             backdrop-filter: blur(8px);
             border-radius: 40px;
             padding: 6px 16px;
@@ -106,13 +106,13 @@
             color: #2c3e50;
             font-weight: 500;
         }
-        .tag-soft:active {
-            background: rgba(255, 255, 255, 0.8);
+        .tag-glass:active {
+            background: rgba(255, 255, 255, 0.85);
             transform: scale(0.96);
         }
         /* 输入框 */
-        .search-soft {
-            background: rgba(255, 255, 255, 0.5);
+        .search-glass {
+            background: rgba(255, 255, 255, 0.55);
             border: 0.5px solid rgba(255, 255, 255, 0.8);
             border-radius: 40px;
             padding: 12px 20px 12px 48px;
@@ -122,18 +122,18 @@
             width: 100%;
             transition: all 0.2s;
         }
-        .search-soft:focus {
-            background: rgba(255, 255, 255, 0.7);
+        .search-glass:focus {
+            background: rgba(255, 255, 255, 0.75);
             border-color: #5e9bff;
         }
-        .search-soft::placeholder {
-            color: #6c7a8e;
+        .search-glass::placeholder {
+            color: #7e8c9e;
         }
         /* 原生 audio 控件透明圆润 */
         audio {
             width: 100%;
             border-radius: 60px;
-            background: rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.5);
             margin-top: 10px;
         }
         /* 滚动条 */
@@ -141,11 +141,11 @@
             width: 4px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
+            background: rgba(0,0,0,0.03);
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.15);
             border-radius: 10px;
         }
         .loader {
@@ -165,40 +165,86 @@
             color: white;
             font-size: 0.9rem;
         }
-        h1 {
+        /* 标题装饰增强 */
+        .title-wrapper {
+            display: inline-block;
+            position: relative;
+        }
+        .title-main {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1a2a3a 0%, #3a6b9b 50%, #5e9bff 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
             letter-spacing: -0.02em;
+            text-shadow: 0 2px 10px rgba(94, 155, 255, 0.2);
+            position: relative;
+            display: inline-block;
+        }
+        .title-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 50%, rgba(94,155,255,0.3), transparent 70%);
+            filter: blur(20px);
+            pointer-events: none;
+            border-radius: 50%;
+        }
+        .title-decoration {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 2rem;
+            vertical-align: middle;
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 60px;
+            padding: 0 12px;
+            line-height: 1.4;
+            font-weight: 400;
+            color: #5e6b7c;
+        }
+        @media (max-width: 640px) {
+            .title-main { font-size: 2.8rem; }
+            .title-decoration { font-size: 1.2rem; padding: 0 8px; }
         }
     </style>
 </head>
 <body>
 <div id="app" class="max-w-3xl mx-auto px-5 py-6 md:py-10">
     
-    <!-- 标题 -->
+    <!-- 标题区域：增强装饰 -->
     <div class="mb-8">
-        <h1 class="text-5xl md:text-6xl font-bold text-gray-800 tracking-tight drop-shadow-sm">卡卡的西</h1>
+        <div class="title-wrapper">
+            <h1 class="title-main">卡卡的西</h1>
+            <span class="title-decoration">✨</span>
+            <div class="title-glow"></div>
+        </div>
     </div>
 
     <!-- 搜索卡片 -->
-    <div class="glass-clear p-5 mb-6">
+    <div class="glass-premium p-5 mb-6">
         <div class="flex justify-between items-center mb-4">
             <span class="text-gray-700 text-sm font-semibold">音质</span>
-            <div class="segmented-soft flex">
+            <div class="segmented-glass flex">
                 <button v-for="q in qualities" :key="q.value" @click="currentQuality = q.value; if(currentSong) refreshUrl()"
-                    class="segment-soft" :class="currentQuality === q.value ? 'segment-soft-active' : ''">{{ q.label }}</button>
+                    class="segment-glass" :class="currentQuality === q.value ? 'segment-glass-active' : ''">{{ q.label }}</button>
             </div>
         </div>
         <div class="relative">
             <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-            <input v-model="keyword" @keyup.enter="searchMusic" type="text" placeholder="歌曲或歌手" class="search-soft">
+            <input v-model="keyword" @keyup.enter="searchMusic" type="text" placeholder="歌曲或歌手" class="search-glass">
         </div>
         <!-- 快捷标签：热门歌手 -->
         <div class="flex gap-2 mt-4 overflow-x-auto pb-1">
-            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; searchMusic()" class="tag-soft whitespace-nowrap">🎤 {{ singer }}</span>
+            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; searchMusic()" class="tag-glass whitespace-nowrap">🎤 {{ singer }}</span>
         </div>
     </div>
 
     <!-- 当前播放卡片 -->
-    <div v-if="currentSong" class="glass-clear p-5 mb-6">
+    <div v-if="currentSong" class="glass-premium p-5 mb-6">
         <div class="flex gap-4">
             <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl shadow-md object-cover" @error="currentSong.cover = defaultCover">
             <div class="flex-1 min-w-0">
@@ -218,8 +264,8 @@
     </div>
 
     <!-- 歌曲列表 -->
-    <div class="glass-clear overflow-hidden">
-        <div class="px-5 py-3 border-b border-white/40 flex justify-between items-center">
+    <div class="glass-premium overflow-hidden">
+        <div class="px-5 py-3 border-b border-white/50 flex justify-between items-center">
             <span class="text-gray-700 font-semibold">播放列表</span>
             <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }} 首</span>
         </div>
@@ -239,7 +285,7 @@
                 </div>
                 <div class="py-4 text-center">
                     <div v-if="isLoadingMore" class="loader w-5 h-5 mx-auto"></div>
-                    <button v-else-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/30 hover:bg-white/50 transition">加载更多</button>
+                    <button v-else-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/40 hover:bg-white/60 transition">加载更多</button>
                     <div v-if="!hasMore && songs.length > 0" class="text-gray-400 text-xs py-2">—— 到底了 ——</div>
                 </div>
             </div>
@@ -277,7 +323,6 @@
             const pageSize = 30;
             const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
             const qualities = [{ value: '128k', label: '标准' },{ value: '320k', label: '高品质' },{ value: 'flac', label: '无损' }];
-            // 热门歌手（替换原来的歌曲标签）
             const hotSingers = ['周杰伦', '林俊杰', '陈奕迅', '邓紫棋', '薛之谦', '李荣浩', '林忆莲', '王菲'];
             const listContainer = ref(null);
             
@@ -302,7 +347,6 @@
                             { src: song.cover, sizes: '256x256' }
                         ]
                     });
-                    // 设置控制回调
                     navigator.mediaSession.setActionHandler('play', () => {
                         if (audioPlayer.value) audioPlayer.value.play();
                     });
@@ -346,7 +390,6 @@
                 currentSong.value = song;
                 currentIndex.value = index;
                 playError.value = '';
-                // 更新灵动岛信息
                 updateMediaSession(song);
                 const url = await fetchSongUrl(song);
                 if (audioPlayer.value) {
