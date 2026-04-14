@@ -92,7 +92,7 @@
 
 <script>
 const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
-const PROXY = 'https://proxy.api.030101.xyz/'; // CORS代理
+const PROXY = 'https://proxy.api.030101.xyz/';
 
 createApp({
     setup() {
@@ -117,7 +117,6 @@ createApp({
         const modeIcon = computed(() => playMode.value === 'random' ? '🎲' : playMode.value === 'repeat-one' ? '🔂' : '🔁');
         const showMsg = (text) => { msg.value = text; setTimeout(() => msg.value = '', 2000); };
 
-        // 锁屏/灵动岛
         const updateMediaSession = (song) => {
             if ('mediaSession' in navigator && song) {
                 navigator.mediaSession.metadata = new MediaMetadata({
@@ -151,51 +150,59 @@ createApp({
         };
         const getQQUrl = (mid) => `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&level=exhigh&type=mp3`;
 
-        // ========== 网易云音乐（使用能返回完整歌曲的第三方API）==========
+        // ========== 网易云音乐（修复版）==========
         const searchNetease = async (query, page) => {
             const offset = (page - 1) * pageSize;
-            // 使用网易云官方搜索API（通过代理）
             const url = `https://music.163.com/api/search/get/?s=${encodeURIComponent(query)}&type=1&offset=${offset}&limit=${pageSize}`;
             const res = await axios.get(PROXY + url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
             const songsList = res.data?.result?.songs || [];
             return {
-                list: songsList.map(song => ({
-                    id: song.id, mid: song.id, name: song.name,
-                    artist: song.artists?.map(a => a.name).join(', ') || '未知歌手',
-                    cover: song.album?.picUrl || defaultCover,
-                    duration: song.duration ? `${Math.floor(song.duration/60000)}:${String(Math.floor((song.duration%60000)/1000)).padStart(2,'0')}` : '03:30',
-                    platform: 'netease'
-                })),
+                list: songsList.map(song => {
+                    // 确保封面正确
+                    let cover = defaultCover;
+                    if (song.album && song.album.picUrl) cover = song.album.picUrl;
+                    else if (song.album && song.album.blurPicUrl) cover = song.album.blurPicUrl;
+                    else if (song.picUrl) cover = song.picUrl;
+                    return {
+                        id: song.id,
+                        mid: song.id,
+                        name: song.name,
+                        artist: song.artists?.map(a => a.name).join(', ') || '未知歌手',
+                        cover: cover,
+                        duration: song.duration ? `${Math.floor(song.duration/60000)}:${String(Math.floor((song.duration%60000)/1000)).padStart(2,'0')}` : '03:30',
+                        platform: 'netease'
+                    };
+                }),
                 hasMore: songsList.length === pageSize
             };
         };
 
-        // 获取网易云完整播放链接（多个备用接口，确保非试听）
+        // 获取网易云完整歌曲（非30秒试听）
         const getNeteaseUrl = async (id) => {
-            // 接口1: api.injahow.cn（稳定，返回完整歌曲）
-            try {
-                const res = await axios.get(`https://api.injahow.cn/music/?type=netease&id=${id}`, { timeout: 10000 });
-                if (res.data && res.data.url && !res.data.url.includes('music.163.com/song/media/outer/url')) {
-                    return res.data.url;
-                }
-            } catch (e) {}
-            // 接口2: api.uomg.com（备用）
-            try {
-                const res = await axios.get(`https://api.uomg.com/api/rand.music?sort=${id}&format=json`, { timeout: 8000 });
-                if (res.data && res.data.data && res.data.data.url) {
-                    return res.data.data.url;
-                }
-            } catch (e) {}
-            // 接口3: 使用第三方解析服务（66mz8）
-            try {
-                const res = await axios.get(`https://api.66mz8.com/api/163.php?url=https://music.163.com/song?id=${id}`, { timeout: 8000 });
-                if (res.data && res.data.url) return res.data.url;
-            } catch (e) {}
-            // 最后降级（可能会返回30秒试听，但作为最后手段）
+            // 使用稳定的第三方解析服务（这些服务专门用于获取VIP完整歌曲）
+            const apis = [
+                `https://api.66mz8.com/api/163.php?url=https://music.163.com/song?id=${id}`,
+                `https://api.vvhan.com/api/163?id=${id}`,
+                `https://api.injahow.cn/music/?type=netease&id=${id}`
+            ];
+            for (const api of apis) {
+                try {
+                    const res = await axios.get(api, { timeout: 10000 });
+                    // 不同接口返回格式不同，需要适配
+                    let url = null;
+                    if (res.data && res.data.data && res.data.data.url) url = res.data.data.url;
+                    else if (res.data && res.data.url) url = res.data.url;
+                    else if (res.data && res.data.data && typeof res.data.data === 'string') url = res.data.data;
+                    else if (typeof res.data === 'string' && res.data.startsWith('http')) url = res.data;
+                    if (url && !url.includes('music.163.com/song/media/outer/url')) {
+                        return url;
+                    }
+                } catch (e) {}
+            }
+            // 降级：官方外链（30秒试听）
             return `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
         };
 
-        // 统一入口
         const searchPlatform = (query, page) => platform.value === 'qq' ? searchQQ(query, page) : searchNetease(query, page);
         const getPlayUrl = (song) => song.platform === 'qq' ? getQQUrl(song.mid) : getNeteaseUrl(song.id);
 
@@ -263,7 +270,6 @@ createApp({
         };
         const playSong = (song, idx) => playTrack(song, idx);
 
-        // 搜索主逻辑
         const search = async () => {
             if (!keyword.value.trim()) { showMsg('输入歌手或歌曲'); return; }
             loading.value = true;
