@@ -2,105 +2,87 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>卡卡的西 · 双平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; }
-        body { background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); min-height: 100vh; }
-        .glass-premium { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(28px); border-radius: 36px; border: 0.5px solid rgba(255, 255, 255, 0.7); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04); transition: all 0.3s ease; }
-        .glass-premium:hover { background: rgba(255, 255, 255, 0.55); }
-        .segmented-glass { background: rgba(255, 255, 255, 0.55); border-radius: 60px; padding: 3px; }
-        .segment-glass { padding: 6px 20px; border-radius: 60px; font-size: 0.85rem; font-weight: 500; background: transparent; color: #2c3e50; cursor: pointer; }
-        .segment-glass-active { background: #ffffff; color: #1e2a3a; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .song-row { transition: all 0.2s; cursor: pointer; }
-        .song-row:active { background: rgba(0,0,0,0.03); transform: scale(0.99); }
-        .playing-highlight { background: rgba(100, 150, 250, 0.15); border-left: 3px solid #5e9bff; }
-        .ctrl-btn { width: 46px; height: 46px; border-radius: 50%; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; cursor: pointer; color: #2c3e50; }
-        .ctrl-btn:active { transform: scale(0.94); background: rgba(255, 255, 255, 0.85); }
-        .play-btn { background: #5e9bff; color: white; box-shadow: 0 4px 12px rgba(94, 155, 255, 0.3); }
-        .tag-glass { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(8px); border-radius: 40px; padding: 6px 16px; font-size: 0.85rem; cursor: pointer; color: #2c3e50; font-weight: 500; }
-        .tag-glass:active { background: rgba(255, 255, 255, 0.85); transform: scale(0.96); }
-        .search-glass { background: rgba(255, 255, 255, 0.55); border: 0.5px solid rgba(255, 255, 255, 0.8); border-radius: 40px; padding: 12px 20px 12px 48px; font-size: 1rem; color: #1e2a3a; outline: none; width: 100%; }
-        .search-glass:focus { background: rgba(255, 255, 255, 0.75); border-color: #5e9bff; }
-        audio { width: 100%; border-radius: 60px; background: rgba(255,255,255,0.5); margin-top: 10px; }
-        .loader { width: 24px; height: 24px; border: 2px solid rgba(0,0,0,0.1); border-top: 2px solid #5e9bff; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-radius: 40px; padding: 8px 20px; color: white; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 10px; }
-        .title-main { font-size: 4rem; font-weight: 800; background: linear-gradient(135deg, #1a2a3a 0%, #3a6b9b 50%, #5e9bff 100%); background-clip: text; -webkit-background-clip: text; color: transparent; }
-        @media (max-width: 640px) { .title-main { font-size: 2.8rem; } }
-        .platform-tab { display: flex; gap: 12px; background: rgba(255,255,255,0.3); border-radius: 40px; padding: 4px; backdrop-filter: blur(4px); }
-        .platform-btn { padding: 6px 24px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: 0.2s; color: #2c3e50; }
-        .platform-active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: #1e2a3a; }
+        *{font-family:Inter,-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif}
+        body{background:linear-gradient(135deg,#e0eafc,#cfdef3);min-height:100vh}
+        .glass{background:rgba(255,255,255,0.45);backdrop-filter:blur(28px);border-radius:36px;border:0.5px solid rgba(255,255,255,0.7)}
+        .ctrl-btn{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .play-btn{background:#5e9bff;color:#fff}
+        .tag{background:rgba(255,255,255,0.55);border-radius:40px;padding:6px 16px;cursor:pointer}
+        .search-input{background:rgba(255,255,255,0.55);border-radius:40px;padding:12px 20px 12px 48px;width:100%;outline:none}
+        audio{width:100%;border-radius:60px;margin-top:10px}
+        .loader{width:24px;height:24px;border:2px solid rgba(0,0,0,0.1);border-top-color:#5e9bff;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .title{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#1a2a3a,#3a6b9b,#5e9bff);background-clip:text;-webkit-background-clip:text;color:transparent}
+        .platform-switch{display:flex;gap:12px;background:rgba(255,255,255,0.3);border-radius:40px;padding:4px}
+        .platform-btn{padding:6px 24px;border-radius:40px;cursor:pointer}
+        .platform-active{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+        .playing{background:rgba(100,150,250,0.15);border-left:3px solid #5e9bff}
     </style>
 </head>
 <body>
-<div id="app" class="max-w-3xl mx-auto px-5 py-6 md:py-10">
-    <div class="mb-8 flex justify-between items-center flex-wrap gap-3">
-        <h1 class="title-main">✨ 卡卡的西 ✨</h1>
-        <div class="platform-tab">
+<div id="app" class="max-w-3xl mx-auto px-5 py-6">
+    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+        <h1 class="title">✨ 卡卡的西 ✨</h1>
+        <div class="platform-switch">
             <div @click="switchPlatform('qq')" class="platform-btn" :class="{'platform-active': platform === 'qq'}">QQ音乐</div>
             <div @click="switchPlatform('netease')" class="platform-btn" :class="{'platform-active': platform === 'netease'}">网易云</div>
         </div>
     </div>
 
-    <!-- 搜索卡片 -->
-    <div class="glass-premium p-5 mb-6">
-        <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+    <div class="glass p-5 mb-6">
+        <div class="flex justify-between items-center mb-4">
             <span class="text-gray-700 text-sm font-semibold">音质</span>
-            <div class="segmented-glass flex">
+            <div class="flex gap-2">
                 <button v-for="q in qualities" :key="q.value" @click="currentQuality = q.value; if(currentSong) refreshUrl()"
-                    class="segment-glass" :class="currentQuality === q.value ? 'segment-glass-active' : ''">{{ q.label }}</button>
+                    class="px-4 py-1.5 rounded-full text-sm" :class="currentQuality === q.value ? 'bg-white shadow' : 'bg-white/30'">{{ q.label }}</button>
             </div>
         </div>
         <div class="relative">
-            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-            <input v-model="keyword" @keyup.enter="searchMusic" type="text" placeholder="歌曲或歌手" class="search-glass">
+            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            <input v-model="keyword" @keyup.enter="search" type="text" placeholder="歌曲或歌手" class="search-input">
         </div>
-        <div class="flex gap-2 mt-4 overflow-x-auto pb-1">
-            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; searchMusic()" class="tag-glass whitespace-nowrap">🎤 {{ singer }}</span>
+        <div class="flex gap-2 mt-4 overflow-x-auto">
+            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; search()" class="tag whitespace-nowrap">🎤 {{ singer }}</span>
         </div>
     </div>
 
-    <!-- 当前播放卡片 -->
-    <div v-if="currentSong" class="glass-premium p-5 mb-6">
+    <div v-if="currentSong" class="glass p-5 mb-6">
         <div class="flex gap-4">
-            <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl shadow-md object-cover" @error="currentSong.cover = defaultCover">
+            <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl object-cover" @error="currentSong.cover = defaultCover">
             <div class="flex-1 min-w-0">
-                <div class="text-gray-500 text-xs uppercase">正在播放 · {{ platform === 'qq' ? 'QQ音乐' : '网易云' }}</div>
+                <div class="text-gray-500 text-xs uppercase">正在播放 · {{ platform === 'qq' ? 'QQ' : '网易云' }}</div>
                 <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.name }}</h2>
                 <p class="text-gray-500 text-sm truncate">{{ currentSong.artist }}</p>
             </div>
         </div>
-        <audio ref="audioPlayer" controls class="mt-3 w-full" @ended="onAudioEnded" @error="onPlayError"></audio>
+        <audio ref="audio" controls class="mt-3" @ended="next" @error="onError"></audio>
         <div class="flex justify-center gap-5 mt-3">
-            <div class="ctrl-btn" @click="prevTrack"><i class="fas fa-backward-step"></i></div>
-            <div class="ctrl-btn play-btn" @click="togglePlayPause"><i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i></div>
-            <div class="ctrl-btn" @click="nextTrack"><i class="fas fa-forward-step"></i></div>
+            <div class="ctrl-btn" @click="prev"><i class="fas fa-backward-step"></i></div>
+            <div class="ctrl-btn play-btn" @click="togglePlay"><i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i></div>
+            <div class="ctrl-btn" @click="next"><i class="fas fa-forward-step"></i></div>
             <div class="ctrl-btn" @click="cycleMode"><i class="fas" :class="modeIcon" :class="{'text-blue-500': playMode !== 'order'}"></i></div>
         </div>
-        <div v-if="playError" class="text-amber-600 text-xs text-center mt-2">{{ playError }}</div>
     </div>
 
-    <!-- 歌曲列表 -->
-    <div class="glass-premium overflow-hidden">
+    <div class="glass overflow-hidden">
         <div class="px-5 py-3 border-b border-white/50 flex justify-between">
-            <span class="text-gray-700 font-semibold">{{ platform === 'qq' ? 'QQ音乐' : '网易云' }} · 播放列表</span>
-            <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }} 首</span>
+            <span class="text-gray-700 font-semibold">{{ platform === 'qq' ? 'QQ音乐' : '网易云' }} · 列表</span>
+            <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }}首</span>
         </div>
-        <div ref="listContainer" class="max-h-[500px] overflow-y-auto custom-scroll">
-            <div v-if="loading && !songs.length" class="py-16 text-center"><div class="loader mx-auto"></div><p class="text-gray-500 text-sm mt-2">搜索中...</p></div>
-            <div v-else-if="!songs.length && !loading" class="py-16 text-center"><i class="fas fa-music text-gray-400 text-5xl mb-3"></i><p class="text-gray-500 text-sm">输入歌曲或歌手开始</p></div>
+        <div ref="list" class="max-h-[500px] overflow-y-auto">
+            <div v-if="loading" class="py-16 text-center"><div class="loader mx-auto"></div><p class="text-gray-500 mt-2">搜索中...</p></div>
+            <div v-else-if="!songs.length && !loading" class="py-16 text-center"><i class="fas fa-music text-gray-400 text-5xl mb-3"></i><p class="text-gray-500">输入关键词开始</p></div>
             <div v-else>
-                <div v-for="(song, idx) in songs" :key="song.id" @click="playSong(song, idx)" class="song-row px-5 py-3 flex items-center gap-3 border-b border-white/30" :class="{'playing-highlight': currentSong && currentSong.id === song.id}">
-                    <div class="text-gray-500 w-7 text-sm">{{ idx+1 }}</div>
+                <div v-for="(song, idx) in songs" :key="song.id" @click="play(song, idx)" class="px-5 py-3 flex items-center gap-3 border-b border-white/30 cursor-pointer" :class="{'playing': currentSong && currentSong.id === song.id}">
+                    <div class="text-gray-500 w-7">{{ idx+1 }}</div>
                     <img :src="song.cover" class="w-10 h-10 rounded-lg object-cover" @error="song.cover = defaultCover">
                     <div class="flex-1 min-w-0">
                         <div class="text-gray-800 font-medium truncate">{{ song.name }}</div>
@@ -110,32 +92,24 @@
                     <i class="fas fa-play text-gray-400 text-xs"></i>
                 </div>
                 <div class="py-4 text-center">
-                    <div v-if="isLoadingMore" class="loader w-5 h-5 mx-auto"></div>
-                    <button v-else-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/40 hover:bg-white/60">加载更多</button>
-                    <div v-if="!hasMore && songs.length" class="text-gray-400 text-xs py-2">—— 到底了 ——</div>
+                    <button v-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/40">加载更多</button>
+                    <div v-if="!hasMore && songs.length" class="text-gray-400 text-xs py-2">到底了</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <transition name="fade"><div v-if="msg" class="fixed bottom-6 left-1/2 -translate-x-1/2 toast z-50">{{ msg }}</div></transition>
+    <div v-if="msg" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-xl text-white px-5 py-2 rounded-full text-sm z-50">{{ msg }}</div>
 </div>
 
 <script>
-    const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
-    // QQ音乐专用代理（仅用于搜索，播放链接使用第三方解析）
+    const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
     const PROXY = 'https://proxy.api.030101.xyz/';
-    const proxyPost = async (url, data, headers = {}) => {
-        const res = await axios.post(PROXY + url, data, {
-            headers: { 'User-Agent': 'Mozilla/5.0', 'Content-Type': 'application/json', ...headers },
-            timeout: 15000
-        });
-        return res.data;
-    };
+    const proxyPost = (url, data) => axios.post(PROXY + url, data, { headers: { 'User-Agent': 'Mozilla/5.0', 'Content-Type': 'application/json' }, timeout: 15000 }).then(r => r.data);
 
     createApp({
         setup() {
-            const platform = ref('qq'); // 'qq' or 'netease'
+            const platform = ref('qq');
             const keyword = ref('');
             const songs = ref([]);
             const loading = ref(false);
@@ -144,7 +118,7 @@
             const playError = ref('');
             const msg = ref('');
             const currentQuality = ref('320k');
-            const audioPlayer = ref(null);
+            const audio = ref(null);
             const isPlaying = ref(false);
             const playMode = ref('order');
             const currentIndex = ref(-1);
@@ -154,250 +128,155 @@
             const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
             const qualities = [{ value: '128k', label: '标准' },{ value: '320k', label: '高品质' },{ value: 'flac', label: '无损' }];
             const hotSingers = ['周杰伦', '林俊杰', '陈奕迅', '邓紫棋', '薛之谦', '李荣浩', '林忆莲', '王菲'];
-            const listContainer = ref(null);
+            const listRef = ref(null);
             
-            const modeIcon = computed(() => {
-                if (playMode.value === 'random') return 'fa-random';
-                if (playMode.value === 'repeat-one') return 'fa-repeat';
-                return 'fa-repeat';
-            });
+            const modeIcon = computed(() => playMode.value === 'random' ? 'fa-random' : playMode.value === 'repeat-one' ? 'fa-repeat' : 'fa-repeat');
             const showMsg = (text) => { msg.value = text; setTimeout(() => msg.value = '', 2000); };
             
-            // Media Session API (灵动岛)
             const updateMediaSession = (song) => {
-                if (!song) return;
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: song.name,
-                        artist: song.artist,
-                        artwork: [{ src: song.cover, sizes: '512x512' }]
-                    });
-                    navigator.mediaSession.setActionHandler('play', () => { if (audioPlayer.value) audioPlayer.value.play(); });
-                    navigator.mediaSession.setActionHandler('pause', () => { if (audioPlayer.value) audioPlayer.value.pause(); });
-                    navigator.mediaSession.setActionHandler('previoustrack', () => { prevTrack(); });
-                    navigator.mediaSession.setActionHandler('nexttrack', () => { nextTrack(); });
+                if ('mediaSession' in navigator && song) {
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: song.name, artist: song.artist, artwork: [{ src: song.cover, sizes: '512x512' }] });
+                    navigator.mediaSession.setActionHandler('play', () => audio.value?.play());
+                    navigator.mediaSession.setActionHandler('pause', () => audio.value?.pause());
+                    navigator.mediaSession.setActionHandler('previoustrack', () => prev());
+                    navigator.mediaSession.setActionHandler('nexttrack', () => next());
                 }
             };
             
-            // ================= QQ音乐 =================
-            const getQQMusicUrl = async (songmid, quality) => {
-                if (!songmid) return null;
-                const qualityMap = { '128k': 'standard', '320k': 'exhigh', 'flac': 'lossless' };
-                const level = qualityMap[quality] || 'exhigh';
-                return `https://music.nxinxz.com/kgqq/tx.php?id=${songmid}&level=${level}&type=mp3`;
-            };
-            const searchQQMusic = async (query, page) => {
-                const postData = {
-                    req_1: {
-                        method: "DoSearchForQQMusicDesktop",
-                        module: "music.search.SearchCgiService",
-                        param: { num_per_page: pageSize, page_num: page, query: query, search_type: 0 }
-                    }
+            // QQ音乐
+            const searchQQ = async (query, page) => {
+                const data = await proxyPost('https://u.y.qq.com/cgi-bin/musicu.fcg', {
+                    req_1: { method: "DoSearchForQQMusicDesktop", module: "music.search.SearchCgiService", param: { num_per_page: pageSize, page_num: page, query, search_type: 0 } }
+                });
+                const list = data?.req_1?.data?.body?.song?.list || [];
+                return {
+                    list: list.map(item => ({
+                        id: item.id, mid: item.mid, name: item.name,
+                        artist: item.singer?.map(s => s.name).join(', ') || '未知歌手',
+                        cover: item.album?.mid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${item.album.mid}.jpg` : defaultCover,
+                        duration: item.interval ? `${Math.floor(item.interval/60)}:${String(item.interval%60).padStart(2,'0')}` : '03:30',
+                        platform: 'qq'
+                    })),
+                    hasMore: list.length === pageSize
                 };
-                const data = await proxyPost('https://u.y.qq.com/cgi-bin/musicu.fcg', postData, { 'Referer': 'https://y.qq.com' });
-                const songList = data?.req_1?.data?.body?.song?.list || [];
-                const formatted = songList.map(item => ({
-                    id: item.id,
-                    mid: item.mid,
-                    name: item.name,
-                    artist: item.singer?.map(s => s.name).join(', ') || '未知歌手',
-                    cover: item.album?.mid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${item.album.mid}.jpg` : defaultCover,
-                    duration: item.interval ? `${Math.floor(item.interval/60)}:${String(item.interval%60).padStart(2,'0')}` : '03:30',
-                    platform: 'qq'
-                }));
-                return { list: formatted, hasMore: songList.length === pageSize };
             };
+            const getQQUrl = (mid) => `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&level=${currentQuality.value === '128k' ? 'standard' : currentQuality.value === '320k' ? 'exhigh' : 'lossless'}&type=mp3`;
             
-            // ================= 网易云音乐（使用稳定第三方API）=================
+            // 网易云（使用官方API + 代理）
             const searchNetease = async (query, page) => {
-                const api = `https://api.injahow.cn/music/search/?type=netease&keyword=${encodeURIComponent(query)}&pageSize=${pageSize}&page=${page}`;
-                const res = await axios.get(api, { timeout: 10000 });
-                if (res.data && res.data.code === 200 && res.data.data && res.data.data.list) {
-                    const songList = res.data.data.list;
-                    const formatted = songList.map(song => ({
-                        id: song.id,
-                        mid: song.id,
-                        name: song.name,
-                        artist: song.artist || '未知歌手',
-                        cover: song.picUrl || defaultCover,
-                        duration: song.duration ? `${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}` : '03:30',
+                const offset = (page - 1) * pageSize;
+                const url = `https://music.163.com/api/search/get/?s=${encodeURIComponent(query)}&type=1&offset=${offset}&limit=${pageSize}`;
+                const res = await axios.get(PROXY + url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+                const songsList = res.data?.result?.songs || [];
+                return {
+                    list: songsList.map(song => ({
+                        id: song.id, mid: song.id, name: song.name,
+                        artist: song.artists?.map(a => a.name).join(', ') || '未知歌手',
+                        cover: song.album?.picUrl || defaultCover,
+                        duration: song.duration ? `${Math.floor(song.duration/60000)}:${String(Math.floor((song.duration%60000)/1000)).padStart(2,'0')}` : '03:30',
                         platform: 'netease'
-                    }));
-                    const hasMoreFlag = songList.length === pageSize;
-                    return { list: formatted, hasMore: hasMoreFlag };
-                } else {
-                    return { list: [], hasMore: false };
-                }
+                    })),
+                    hasMore: songsList.length === pageSize
+                };
             };
-            // 网易云播放链接获取（同样使用 injahow 接口）
-            const getNeteaseUrl = async (songId) => {
-                const api = `https://api.injahow.cn/music/?type=netease&id=${songId}`;
+            const getNeteaseUrl = async (id) => {
                 try {
-                    const res = await axios.get(api, { timeout: 10000 });
-                    if (res.data && res.data.url) return res.data.url;
-                    return `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
-                } catch (e) {
-                    return `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
-                }
+                    const res = await axios.get(`https://api.injahow.cn/music/?type=netease&id=${id}`, { timeout: 8000 });
+                    if (res.data?.url) return res.data.url;
+                } catch(e) {}
+                return `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
             };
             
-            // 统一搜索分发
-            const performSearch = async (query, page) => {
-                if (platform.value === 'qq') {
-                    return await searchQQMusic(query, page);
-                } else {
-                    return await searchNetease(query, page);
-                }
-            };
+            const getPlayUrl = (song) => song.platform === 'qq' ? getQQUrl(song.mid) : getNeteaseUrl(song.id);
             
-            // 统一播放链接获取
-            const getPlayUrl = async (song) => {
-                if (song.platform === 'qq') {
-                    return await getQQMusicUrl(song.mid, currentQuality.value);
-                } else {
-                    return await getNeteaseUrl(song.id);
-                }
-            };
-            
-            // 播放核心
-            const playTrack = async (song, index) => {
+            const playTrack = async (song, idx) => {
                 if (!song) return;
                 currentSong.value = song;
-                currentIndex.value = index;
-                playError.value = '';
+                currentIndex.value = idx;
                 updateMediaSession(song);
                 const url = await getPlayUrl(song);
-                if (audioPlayer.value) {
-                    audioPlayer.value.src = url;
-                    audioPlayer.value.load();
+                if (audio.value) {
+                    audio.value.src = url;
+                    audio.value.load();
                     try {
-                        await audioPlayer.value.play();
+                        await audio.value.play();
                         isPlaying.value = true;
                     } catch (err) {
-                        playError.value = '播放失败，自动跳过';
-                        showMsg(`⚠️ 无法播放: ${song.name}，跳过`);
-                        setTimeout(() => { if (currentSong.value === song) nextTrack(); }, 100);
-                        return;
+                        showMsg(`⚠️ 播放失败: ${song.name}，自动跳过`);
+                        setTimeout(() => next(), 100);
                     }
                 }
                 showMsg(`🎵 ${song.name}`);
             };
             
             const getNextIndex = () => {
-                if (songs.value.length === 0) return -1;
+                if (!songs.value.length) return -1;
                 if (playMode.value === 'random') {
-                    if (songs.value.length === 1) return 0;
                     let newIdx = Math.floor(Math.random() * songs.value.length);
-                    while (newIdx === currentIndex.value) newIdx = Math.floor(Math.random() * songs.value.length);
+                    while (newIdx === currentIndex.value && songs.value.length > 1) newIdx = Math.floor(Math.random() * songs.value.length);
                     return newIdx;
-                } else if (playMode.value === 'repeat-one') {
-                    return currentIndex.value;
-                } else {
-                    return (currentIndex.value + 1) % songs.value.length;
-                }
+                } else if (playMode.value === 'repeat-one') return currentIndex.value;
+                return (currentIndex.value + 1) % songs.value.length;
             };
             
-            const nextTrack = async () => {
-                if (songs.value.length === 0) return;
+            const next = async () => {
+                if (!songs.value.length) return;
                 if (playMode.value === 'repeat-one') {
-                    if (audioPlayer.value && currentSong.value) {
-                        audioPlayer.value.currentTime = 0;
-                        await audioPlayer.value.play().catch(e => console.warn(e));
-                    }
+                    if (audio.value && currentSong.value) { audio.value.currentTime = 0; audio.value.play(); }
                     return;
                 }
-                const nextIdx = getNextIndex();
-                if (nextIdx !== -1 && songs.value[nextIdx]) {
-                    await playTrack(songs.value[nextIdx], nextIdx);
-                }
+                const idx = getNextIndex();
+                if (idx !== -1) await playTrack(songs.value[idx], idx);
             };
             
-            const prevTrack = async () => {
-                if (songs.value.length === 0) return;
-                let prevIdx;
-                if (playMode.value === 'random') prevIdx = Math.floor(Math.random() * songs.value.length);
-                else if (playMode.value === 'repeat-one') prevIdx = currentIndex.value;
-                else prevIdx = (currentIndex.value - 1 + songs.value.length) % songs.value.length;
-                if (prevIdx >= 0 && songs.value[prevIdx]) await playTrack(songs.value[prevIdx], prevIdx);
+            const prev = async () => {
+                if (!songs.value.length) return;
+                let idx;
+                if (playMode.value === 'random') idx = Math.floor(Math.random() * songs.value.length);
+                else if (playMode.value === 'repeat-one') idx = currentIndex.value;
+                else idx = (currentIndex.value - 1 + songs.value.length) % songs.value.length;
+                if (idx !== -1) await playTrack(songs.value[idx], idx);
             };
             
-            const onAudioEnded = () => { nextTrack(); };
-            const onPlayError = () => {
-                if (currentSong.value) {
-                    playError.value = '播放出错，跳过';
-                    showMsg(`⚠️ 播放出错: ${currentSong.value.name}，跳过`);
-                    nextTrack();
-                }
+            const togglePlay = () => {
+                if (!audio.value) return;
+                if (isPlaying.value) audio.value.pause();
+                else audio.value.play();
             };
-            const togglePlayPause = () => {
-                if (!audioPlayer.value) return;
-                if (isPlaying.value) audioPlayer.value.pause();
-                else audioPlayer.value.play().catch(e => console.warn(e));
-            };
-            const refreshUrl = async () => {
-                if (currentSong.value) {
-                    const url = await getPlayUrl(currentSong.value);
-                    if (audioPlayer.value) {
-                        const wasPlaying = !audioPlayer.value.paused;
-                        audioPlayer.value.src = url;
-                        audioPlayer.value.load();
-                        if (wasPlaying) audioPlayer.value.play().catch(e => console.warn(e));
-                    }
-                }
-            };
+            const onError = () => { showMsg('播放出错，跳过'); next(); };
+            const refreshUrl = async () => { if (currentSong.value) await playTrack(currentSong.value, currentIndex.value); };
             const cycleMode = () => {
                 if (playMode.value === 'order') playMode.value = 'random';
                 else if (playMode.value === 'random') playMode.value = 'repeat-one';
                 else playMode.value = 'order';
                 showMsg(`模式: ${playMode.value === 'order' ? '顺序' : playMode.value === 'random' ? '随机' : '单曲循环'}`);
             };
-            const playSong = async (song, idx) => { await playTrack(song, idx); };
             
-            // 搜索主函数
-            const searchMusic = async () => {
+            const search = async () => {
                 if (!keyword.value.trim()) { showMsg('输入歌手或歌曲'); return; }
                 loading.value = true;
                 currentPage.value = 1;
-                hasMore.value = true;
                 songs.value = [];
-                currentSong.value = null;
-                if (audioPlayer.value) audioPlayer.value.pause();
                 try {
-                    const { list, hasMore: more } = await performSearch(keyword.value, 1);
+                    const { list, hasMore: more } = platform.value === 'qq' ? await searchQQ(keyword.value, 1) : await searchNetease(keyword.value, 1);
                     songs.value = list;
                     hasMore.value = more;
-                    if (list.length === 0) showMsg('未找到歌曲');
-                    else showMsg(`找到 ${list.length} 首`);
+                    showMsg(list.length ? `找到 ${list.length} 首` : '未找到');
                     if (list.length) currentPage.value = 2;
-                } catch (err) {
-                    console.error(err);
-                    showMsg('搜索失败，请稍后重试');
-                } finally {
-                    loading.value = false;
-                }
+                } catch(e) { showMsg('搜索失败'); }
+                loading.value = false;
             };
             
             const loadMore = async () => {
                 if (isLoadingMore.value || !hasMore.value || loading.value) return;
                 isLoadingMore.value = true;
                 try {
-                    const { list, hasMore: more } = await performSearch(keyword.value, currentPage.value);
+                    const { list, hasMore: more } = platform.value === 'qq' ? await searchQQ(keyword.value, currentPage.value) : await searchNetease(keyword.value, currentPage.value);
                     songs.value = [...songs.value, ...list];
                     hasMore.value = more;
                     if (list.length) currentPage.value++;
-                } catch (err) {
-                    showMsg('加载更多失败');
-                } finally {
-                    isLoadingMore.value = false;
-                }
-            };
-            
-            const handleScroll = () => {
-                if (!listContainer.value) return;
-                const { scrollTop, clientHeight, scrollHeight } = listContainer.value;
-                if (scrollTop + clientHeight >= scrollHeight - 100) {
-                    if (hasMore.value && !isLoadingMore.value && !loading.value && keyword.value.trim()) loadMore();
-                }
+                } catch(e) { showMsg('加载更多失败'); }
+                isLoadingMore.value = false;
             };
             
             const switchPlatform = (plat) => {
@@ -405,32 +284,29 @@
                 platform.value = plat;
                 songs.value = [];
                 currentSong.value = null;
-                if (audioPlayer.value) audioPlayer.value.pause();
+                if (audio.value) audio.value.pause();
                 keyword.value = '';
-                showMsg(`已切换到${plat === 'qq' ? 'QQ音乐' : '网易云'}`);
+                showMsg(`切换到${plat === 'qq' ? 'QQ音乐' : '网易云'}`);
             };
             
-            const bindEvents = () => {
-                if (!audioPlayer.value) return;
-                audioPlayer.value.addEventListener('play', () => { isPlaying.value = true; });
-                audioPlayer.value.addEventListener('pause', () => { isPlaying.value = false; });
+            const handleScroll = () => {
+                if (!listRef.value) return;
+                const { scrollTop, clientHeight, scrollHeight } = listRef.value;
+                if (scrollTop + clientHeight >= scrollHeight - 100 && hasMore.value && !isLoadingMore.value && !loading.value && keyword.value.trim()) loadMore();
             };
             
             onMounted(() => {
-                if (listContainer.value) listContainer.value.addEventListener('scroll', handleScroll);
-                if (audioPlayer.value) bindEvents();
+                if (listRef.value) listRef.value.addEventListener('scroll', handleScroll);
+                if (audio.value) audio.value.addEventListener('play', () => isPlaying.value = true);
+                if (audio.value) audio.value.addEventListener('pause', () => isPlaying.value = false);
             });
-            onUnmounted(() => {
-                if (listContainer.value) listContainer.value.removeEventListener('scroll', handleScroll);
-            });
-            watch(audioPlayer, (newVal) => { if (newVal) bindEvents(); });
+            onUnmounted(() => { if (listRef.value) listRef.value.removeEventListener('scroll', handleScroll); });
+            watch(audio, (val) => { if (val) { val.addEventListener('play', () => isPlaying.value = true); val.addEventListener('pause', () => isPlaying.value = false); } });
             
             return {
                 platform, keyword, songs, loading, isLoadingMore, currentSong, playError, msg, currentQuality,
-                qualities, defaultCover, hotSingers, hasMore, listContainer, audioPlayer, isPlaying,
-                playMode, modeIcon,
-                switchPlatform, searchMusic, loadMore, playSong, togglePlayPause, nextTrack, prevTrack,
-                cycleMode, onAudioEnded, refreshUrl, onPlayError
+                qualities, defaultCover, hotSingers, hasMore, listRef, audio, isPlaying, playMode, modeIcon,
+                switchPlatform, search, loadMore, play: playTrack, togglePlay, next, prev, cycleMode, onError, refreshUrl
             };
         }
     }).mount('#app');
