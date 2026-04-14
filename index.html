@@ -45,7 +45,6 @@
 <div id="app" class="max-w-3xl mx-auto px-5 py-6 md:py-10">
     <div class="mb-8 flex justify-between items-center flex-wrap gap-3">
         <h1 class="title-main">✨ 卡卡的西 ✨</h1>
-        <!-- 平台切换 -->
         <div class="platform-tab">
             <div @click="switchPlatform('qq')" class="platform-btn" :class="{'platform-active': platform === 'qq'}">QQ音乐</div>
             <div @click="switchPlatform('netease')" class="platform-btn" :class="{'platform-active': platform === 'netease'}">网易云</div>
@@ -124,20 +123,11 @@
 
 <script>
     const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
-    // 公共 CORS 代理
+    // QQ音乐专用代理（仅用于搜索，播放链接使用第三方解析）
     const PROXY = 'https://proxy.api.030101.xyz/';
     const proxyPost = async (url, data, headers = {}) => {
         const res = await axios.post(PROXY + url, data, {
             headers: { 'User-Agent': 'Mozilla/5.0', 'Content-Type': 'application/json', ...headers },
-            timeout: 15000
-        });
-        return res.data;
-    };
-    const proxyGet = async (url, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        const fullUrl = query ? url + '?' + query : url;
-        const res = await axios.get(PROXY + fullUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0' },
             timeout: 15000
         });
         return res.data;
@@ -173,7 +163,7 @@
             });
             const showMsg = (text) => { msg.value = text; setTimeout(() => msg.value = '', 2000); };
             
-            // Media Session API
+            // Media Session API (灵动岛)
             const updateMediaSession = (song) => {
                 if (!song) return;
                 if ('mediaSession' in navigator) {
@@ -218,40 +208,33 @@
                 return { list: formatted, hasMore: songList.length === pageSize };
             };
             
-            // ================= 网易云音乐 =================
-            // 搜索接口（使用官方搜索API，通过代理）
+            // ================= 网易云音乐（使用稳定第三方API）=================
             const searchNetease = async (query, page) => {
-                const offset = (page - 1) * pageSize;
-                const url = 'https://music.163.com/api/search/get/';
-                const params = {
-                    s: query,
-                    type: 1,
-                    offset: offset,
-                    limit: pageSize,
-                    total: true
-                };
-                const data = await proxyGet(url, params);
-                const songsList = data?.result?.songs || [];
-                const formatted = songsList.map(song => ({
-                    id: song.id,
-                    mid: song.id,
-                    name: song.name,
-                    artist: song.artists?.map(a => a.name).join(', ') || '未知歌手',
-                    cover: song.album?.picUrl || defaultCover,
-                    duration: song.duration ? `${Math.floor(song.duration/60000)}:${String(Math.floor((song.duration%60000)/1000)).padStart(2,'0')}` : '03:30',
-                    platform: 'netease'
-                }));
-                const hasMoreFlag = songsList.length === pageSize;
-                return { list: formatted, hasMore: hasMoreFlag };
+                const api = `https://api.injahow.cn/music/search/?type=netease&keyword=${encodeURIComponent(query)}&pageSize=${pageSize}&page=${page}`;
+                const res = await axios.get(api, { timeout: 10000 });
+                if (res.data && res.data.code === 200 && res.data.data && res.data.data.list) {
+                    const songList = res.data.data.list;
+                    const formatted = songList.map(song => ({
+                        id: song.id,
+                        mid: song.id,
+                        name: song.name,
+                        artist: song.artist || '未知歌手',
+                        cover: song.picUrl || defaultCover,
+                        duration: song.duration ? `${Math.floor(song.duration/60)}:${String(song.duration%60).padStart(2,'0')}` : '03:30',
+                        platform: 'netease'
+                    }));
+                    const hasMoreFlag = songList.length === pageSize;
+                    return { list: formatted, hasMore: hasMoreFlag };
+                } else {
+                    return { list: [], hasMore: false };
+                }
             };
-            // 网易云播放链接获取（使用第三方解析接口）
-            const getNeteaseUrl = async (songId, quality) => {
-                // 使用 injahow 接口获取真实播放链接
+            // 网易云播放链接获取（同样使用 injahow 接口）
+            const getNeteaseUrl = async (songId) => {
                 const api = `https://api.injahow.cn/music/?type=netease&id=${songId}`;
                 try {
                     const res = await axios.get(api, { timeout: 10000 });
                     if (res.data && res.data.url) return res.data.url;
-                    // 降级使用官方外链（可能失效）
                     return `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
                 } catch (e) {
                     return `https://music.163.com/song/media/outer/url?id=${songId}.mp3`;
@@ -272,7 +255,7 @@
                 if (song.platform === 'qq') {
                     return await getQQMusicUrl(song.mid, currentQuality.value);
                 } else {
-                    return await getNeteaseUrl(song.id, currentQuality.value);
+                    return await getNeteaseUrl(song.id);
                 }
             };
             
@@ -387,6 +370,7 @@
                     else showMsg(`找到 ${list.length} 首`);
                     if (list.length) currentPage.value = 2;
                 } catch (err) {
+                    console.error(err);
                     showMsg('搜索失败，请稍后重试');
                 } finally {
                     loading.value = false;
@@ -419,7 +403,6 @@
             const switchPlatform = (plat) => {
                 if (platform.value === plat) return;
                 platform.value = plat;
-                // 清空当前列表和播放
                 songs.value = [];
                 currentSong.value = null;
                 if (audioPlayer.value) audioPlayer.value.pause();
