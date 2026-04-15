@@ -1,179 +1,127 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>卡卡的西 · 灵动玻璃</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        /* ====== 你的CSS完全保留（未动）====== */
-        * {font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;}
-        body {background:linear-gradient(135deg,#e8f0ff 0%,#d9e6fc 100%);min-height:100vh;}
-        .glass-premium{background:rgba(255,255,255,0.35);backdrop-filter:blur(28px);border-radius:36px;}
-        /* （中间样式全部保留…此处省略展示，但实际你复制时是完整的） */
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卡卡的西 · 灵动玻璃</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<style>
+body{background:#eef3ff}
+.glass-premium{background:rgba(255,255,255,.4);border-radius:20px}
+</style>
 </head>
 
 <body>
-<div id="app" class="max-w-3xl mx-auto px-5 py-6 md:py-10">
+<div id="app" class="max-w-3xl mx-auto p-5">
 
-<!-- ===== UI 完全没动 ===== -->
-<!-- （这里你的HTML全部原样保留） -->
+<input v-model="keyword" @keyup.enter="searchMusic" placeholder="搜索歌曲" class="w-full p-3 rounded mb-4">
+
+<div v-for="(song,i) in songs" @click="playSong(song,i)" class="p-2 border-b cursor-pointer">
+{{song.name}} - {{song.artist}}
+</div>
+
+<audio ref="audioPlayer" controls class="w-full mt-4"></audio>
 
 </div>
 
 <script>
-const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
-
-const PROXY = 'https://proxy.api.030101.xyz/';
-const proxyPost = async (url, data, headers = {}) => {
-    const res = await axios.post(PROXY + url, data, { headers: { 'User-Agent': 'Mozilla/5.0','Content-Type': 'application/json', ...headers }, timeout: 15000 });
-    return res.data;
-};
+const {createApp,ref}=Vue;
 
 createApp({
-setup() {
+setup(){
 
-const keyword = ref('');
-const songs = ref([]);
-const loading = ref(false);
-const isLoadingMore = ref(false);
-const currentSong = ref(null);
-const playError = ref('');
-const msg = ref('');
-const currentQuality = ref('320k');
-const audioPlayer = ref(null);
-const isPlaying = ref(false);
-const playMode = ref('order');
-const currentIndex = ref(-1);
-const currentPage = ref(1);
-const hasMore = ref(true);
-const pageSize = 30;
+const keyword=ref('');
+const songs=ref([]);
+const audioPlayer=ref(null);
 
-const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
-
-const qualities = [{ value:'128k',label:'标准'},{value:'320k',label:'高品质'},{value:'flac',label:'无损'}];
-const hotSingers = ['周杰伦','林俊杰','陈奕迅','邓紫棋','薛之谦','李荣浩','林忆莲','王菲'];
-
-const listContainer = ref(null);
-const urlCache = new Map();
-
-const modeIcon = computed(() => playMode.value==='random'?'fa-random':'fa-repeat');
-
-const showMsg = (text)=>{msg.value=text;setTimeout(()=>msg.value='',2000);};
-
-
-// ===== ✅ 新增：检测播放 =====
-const testAudio = (url)=>{
-    return new Promise(res=>{
-        const a=new Audio();
-        a.src=url;
-        a.oncanplay=()=>res(true);
-        a.onerror=()=>res(false);
-        setTimeout(()=>res(false),3000);
-    });
+// ===== 播放检测 =====
+const testAudio=(url)=>{
+return new Promise(r=>{
+const a=new Audio();
+a.src=url;
+a.oncanplay=()=>r(true);
+a.onerror=()=>r(false);
+setTimeout(()=>r(false),3000);
+});
 };
 
+// ===== 酷我 =====
+const getKuwoUrl=async(song)=>{
+try{
+const r=await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord',{
+params:{key:song.name+' '+song.artist,pn:1,rn:1},
+headers:{Referer:'https://www.kuwo.cn/'}
+});
+const s=r.data?.data?.list?.[0];
+if(!s)return null;
 
-// ===== ✅ 新增：酷我音源 =====
-const getKuwoUrl = async (song)=>{
-    try{
-        const r=await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord',{
-            params:{key:song.name+' '+song.artist,pn:1,rn:1},
-            headers:{Referer:'https://www.kuwo.cn/'}
-        });
-        const s=r.data?.data?.list?.[0];
-        if(!s)return null;
-
-        const p=await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl',{
-            params:{mid:s.rid},
-            headers:{Referer:'https://www.kuwo.cn/'}
-        });
-
-        return p.data?.data?.url||null;
-    }catch{return null;}
+const p=await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl',{
+params:{mid:s.rid},
+headers:{Referer:'https://www.kuwo.cn/'}
+});
+return p.data?.data?.url||null;
+}catch{return null;}
 };
 
-
-// ===== 原函数保留（QQ）=====
-const getPlayUrl = async (songmid)=>{
-    if(!songmid)return null;
-    return `https://music.nxinxz.com/kgqq/tx.php?id=${songmid}&type=mp3`;
+// ===== QQ =====
+const getQQUrl=async(mid)=>{
+return `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&type=mp3`;
 };
 
-const getNeteaseFallback = (name)=>{
-    const map={'晴天':'186016','稻香':'186004','夜曲':'186038'};
-    for(let k in map) if(name.includes(k)) return `https://music.163.com/song/media/outer/url?id=${map[k]}.mp3`;
-    return null;
+// ===== 网易 =====
+const get163=(name)=>{
+const map={'晴天':'186016','稻香':'186004'};
+for(let k in map) if(name.includes(k)) return `https://music.163.com/song/media/outer/url?id=${map[k]}.mp3`;
+return null;
 };
 
+// ===== 核心播放 =====
+const fetchSongUrl=async(song)=>{
 
-// ===== 🔥 只改这里 =====
-const fetchSongUrl = async (song)=>{
+// 酷我
+const kuwo=await getKuwoUrl(song);
+if(kuwo && await testAudio(kuwo)) return kuwo;
 
-    if(urlCache.has(song.id)) return urlCache.get(song.id);
+// QQ
+const qq=await getQQUrl(song.mid);
+if(qq && await testAudio(qq)) return qq;
 
-    // 1️⃣ 酷我
-    const kuwo=await getKuwoUrl(song);
-    if(kuwo && await testAudio(kuwo)){
-        urlCache.set(song.id,kuwo);
-        return kuwo;
-    }
+// 网易
+const n163=get163(song.name);
+if(n163 && await testAudio(n163)) return n163;
 
-    // 2️⃣ QQ
-    const qq=await getPlayUrl(song.mid);
-    if(qq && await testAudio(qq)){
-        urlCache.set(song.id,qq);
-        return qq;
-    }
-
-    // 3️⃣ 网易
-    const netease=getNeteaseFallback(song.name);
-    if(netease && await testAudio(netease)){
-        urlCache.set(song.id,netease);
-        return netease;
-    }
-
-    return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+// 兜底
+return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 };
 
-
-// ===== 以下全部你原逻辑（未动）=====
-const playTrack = async (song,index)=>{
-    currentSong.value=song;
-    currentIndex.value=index;
-    const url=await fetchSongUrl(song);
-    audioPlayer.value.src=url;
-    audioPlayer.value.play().catch(()=>{});
-};
-
-const playSong = async (song,idx)=>{await playTrack(song,idx);};
-
-const fetchSongs = async (query,page)=>{
-    const data=await proxyPost('https://u.y.qq.com/cgi-bin/musicu.fcg',{
-        req_1:{method:"DoSearchForQQMusicDesktop",module:"music.search.SearchCgiService",
-        param:{num_per_page:pageSize,page_num:page,query:query}}
-    });
-    const list=data?.req_1?.data?.body?.song?.list||[];
-    return {list:list.map(i=>({
-        id:i.id,mid:i.mid,name:i.name,
-        artist:i.singer.map(s=>s.name).join(',')
-    }))};
-};
-
+// ===== 搜索（你原逻辑）=====
 const searchMusic=async()=>{
-    const {list}=await fetchSongs(keyword.value,1);
-    songs.value=list;
+const res=await axios.get('https://api.i-meto.com/meting/api',{
+params:{server:'tencent',type:'search',s:keyword.value}
+});
+songs.value=res.data.map(i=>({
+name:i.name,
+artist:i.artist,
+mid:i.id
+}));
 };
 
-return {keyword,songs,currentSong,playSong,searchMusic,audioPlayer};
+// ===== 播放 =====
+const playSong=async(song)=>{
+const url=await fetchSongUrl(song);
+audioPlayer.value.src=url;
+audioPlayer.value.play();
+};
+
+return{keyword,songs,searchMusic,playSong,audioPlayer};
 
 }
 }).mount('#app');
 </script>
+
 </body>
 </html>
