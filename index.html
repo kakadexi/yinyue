@@ -375,7 +375,8 @@
                 <span class="star">✨</span>
                 <span style="font-weight: 500; background: none; -webkit-background-clip: unset; color: inherit;">&nbsp;临时邮箱</span>
             </h1>
-            <img src="https://mpimg.cn/view.php/f28da3eac8f392e9fa2ba91723b2bf4c.png" class="avatar" alt="avatar">
+            <!-- 头像链接已替换为您提供的地址 -->
+            <img src="https://qu.ax/Pg5Ar.jpeg" class="avatar" alt="avatar">
             <p style="color: var(--text-light-secondary); font-size: 0.85rem; margin-top: 6px; opacity: 0.9;">📭 阅后即焚 · 灵动隐私 · 瞬发电邮</p>
             <div id="addr" class="mail-display">⚡ 正在生成炫光邮箱...</div>
             <div class="btn-group">
@@ -570,7 +571,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             await init(3);
             startPolling();
-            // 添加点击背景等优雅行为，避免任何音乐残留
         });
 
         // 若重新生成地址时，重置轮询无需重启，继续使用新mid刷新
@@ -580,7 +580,6 @@
         window.viewMail = viewMail;
         window.closeMail = closeMail;
         window.init = init;    // 以防万一
-        // 优雅处理异常，不残留任何音乐代码
     </script>
 </body>
 </html>
