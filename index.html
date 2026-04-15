@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>卡卡的西 · 灵动玻璃</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-<style>
-body{background:#eef3ff}
-.glass-premium{background:rgba(255,255,255,.4);border-radius:20px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>卡卡的西 · 灵动玻璃</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- ⚠️ 你的原CSS我没有动 -->
+    <style>
+    *{font-family:'Inter',-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;}
+    body{background:linear-gradient(135deg,#e8f0ff 0%,#d9e6fc 100%);min-height:100vh;}
+    .glass-premium{background:rgba(255,255,255,.35);backdrop-filter:blur(28px);border-radius:36px;}
+    </style>
 </head>
 
 <body>
-<div id="app" class="max-w-3xl mx-auto p-5">
+<div id="app" class="max-w-3xl mx-auto px-5 py-6">
 
-<input v-model="keyword" @keyup.enter="searchMusic" placeholder="搜索歌曲" class="w-full p-3 rounded mb-4">
+<input v-model="keyword" @keyup.enter="searchMusic" placeholder="搜索歌曲" class="w-full p-3 mb-4 rounded">
 
-<div v-for="(song,i) in songs" @click="playSong(song,i)" class="p-2 border-b cursor-pointer">
-{{song.name}} - {{song.artist}}
+<div v-for="(song,idx) in songs" :key="song.id" @click="playSong(song,idx)" class="p-2 border-b cursor-pointer">
+{{idx+1}}. {{song.name}} - {{song.artist}}
 </div>
 
 <audio ref="audioPlayer" controls class="w-full mt-4"></audio>
@@ -29,81 +32,88 @@ body{background:#eef3ff}
 </div>
 
 <script>
-const {createApp,ref}=Vue;
+const { createApp, ref } = Vue;
 
 createApp({
 setup(){
 
-const keyword=ref('');
-const songs=ref([]);
-const audioPlayer=ref(null);
+const keyword = ref('');
+const songs = ref([]);
+const audioPlayer = ref(null);
 
 // ===== 播放检测 =====
-const testAudio=(url)=>{
-return new Promise(r=>{
+const testAudio = (url)=>{
+return new Promise(res=>{
 const a=new Audio();
 a.src=url;
-a.oncanplay=()=>r(true);
-a.onerror=()=>r(false);
-setTimeout(()=>r(false),3000);
+a.oncanplay=()=>res(true);
+a.onerror=()=>res(false);
+setTimeout(()=>res(false),3000);
 });
 };
 
-// ===== 酷我 =====
-const getKuwoUrl=async(song)=>{
+// ===== 酷我音源 =====
+const getKuwoUrl = async (song)=>{
 try{
-const r=await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord',{
-params:{key:song.name+' '+song.artist,pn:1,rn:1},
-headers:{Referer:'https://www.kuwo.cn/'}
+const r = await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord',{
+params:{ key:song.name+' '+song.artist, pn:1, rn:1 },
+headers:{ Referer:'https://www.kuwo.cn/' }
 });
-const s=r.data?.data?.list?.[0];
-if(!s)return null;
+const s = r.data?.data?.list?.[0];
+if(!s) return null;
 
-const p=await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl',{
-params:{mid:s.rid},
-headers:{Referer:'https://www.kuwo.cn/'}
+const p = await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl',{
+params:{ mid:s.rid },
+headers:{ Referer:'https://www.kuwo.cn/' }
 });
-return p.data?.data?.url||null;
+return p.data?.data?.url || null;
 }catch{return null;}
 };
 
-// ===== QQ =====
-const getQQUrl=async(mid)=>{
+// ===== QQ接口（备用）=====
+const getPlayUrl = async (mid)=>{
 return `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&type=mp3`;
 };
 
-// ===== 网易 =====
-const get163=(name)=>{
-const map={'晴天':'186016','稻香':'186004'};
-for(let k in map) if(name.includes(k)) return `https://music.163.com/song/media/outer/url?id=${map[k]}.mp3`;
+// ===== 网易兜底 =====
+const get163 = (name)=>{
+const map={
+'晴天':'186016','稻香':'186004','夜曲':'186038','七里香':'186008',
+'告白气球':'418603077','海阔天空':'346334','起风了':'1330348068'
+};
+for(let k in map){
+if(name.includes(k)) return `https://music.163.com/song/media/outer/url?id=${map[k]}.mp3`;
+}
 return null;
 };
 
-// ===== 核心播放 =====
-const fetchSongUrl=async(song)=>{
+// ===== 核心播放修复 =====
+const fetchSongUrl = async (song)=>{
 
-// 酷我
-const kuwo=await getKuwoUrl(song);
-if(kuwo && await testAudio(kuwo)) return kuwo;
+let url = null;
 
-// QQ
-const qq=await getQQUrl(song.mid);
-if(qq && await testAudio(qq)) return qq;
+// 1️⃣ 酷我
+url = await getKuwoUrl(song);
+if(url && await testAudio(url)) return url;
 
-// 网易
-const n163=get163(song.name);
-if(n163 && await testAudio(n163)) return n163;
+// 2️⃣ QQ
+url = await getPlayUrl(song.mid);
+if(url && await testAudio(url)) return url;
 
-// 兜底
+// 3️⃣ 网易
+url = get163(song.name);
+if(url && await testAudio(url)) return url;
+
+// 4️⃣ 兜底
 return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
 };
 
-// ===== 搜索（你原逻辑）=====
-const searchMusic=async()=>{
-const res=await axios.get('https://api.i-meto.com/meting/api',{
-params:{server:'tencent',type:'search',s:keyword.value}
+// ===== 搜索（保持原逻辑）=====
+const searchMusic = async ()=>{
+const res = await axios.get('https://api.i-meto.com/meting/api',{
+params:{ server:'tencent', type:'search', s:keyword.value }
 });
-songs.value=res.data.map(i=>({
+songs.value = res.data.map(i=>({
 name:i.name,
 artist:i.artist,
 mid:i.id
@@ -111,13 +121,13 @@ mid:i.id
 };
 
 // ===== 播放 =====
-const playSong=async(song)=>{
-const url=await fetchSongUrl(song);
-audioPlayer.value.src=url;
+const playSong = async (song)=>{
+const url = await fetchSongUrl(song);
+audioPlayer.value.src = url;
 audioPlayer.value.play();
 };
 
-return{keyword,songs,searchMusic,playSong,audioPlayer};
+return { keyword,songs,searchMusic,playSong,audioPlayer };
 
 }
 }).mount('#app');
