@@ -2,319 +2,585 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>卡卡的西 · QQ音乐</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨卡卡的西✨临时邮箱 · 灵动玻璃质感</title>
     <style>
-        *{font-family:Inter,-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif}
-        body{background:linear-gradient(135deg,#e0eafc,#cfdef3);min-height:100vh}
-        .glass{background:rgba(255,255,255,0.45);backdrop-filter:blur(28px);border-radius:36px;border:0.5px solid rgba(255,255,255,0.7)}
-        .ctrl-btn{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;cursor:pointer}
-        .play-btn{background:#5e9bff;color:#fff}
-        .tag{background:rgba(255,255,255,0.55);border-radius:40px;padding:6px 16px;cursor:pointer}
-        .search-input{background:rgba(255,255,255,0.55);border-radius:40px;padding:12px 20px 12px 48px;width:100%;outline:none}
-        audio{width:100%;border-radius:60px;margin-top:10px}
-        .loader{width:24px;height:24px;border:2px solid rgba(0,0,0,0.1);border-top-color:#5e9bff;border-radius:50%;animation:spin .8s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .title{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#1a2a3a,#3a6b9b,#5e9bff);background-clip:text;-webkit-background-clip:text;color:transparent}
-        .playing{background:rgba(94,155,255,0.15);border-left:3px solid #5e9bff}
-        .custom-scroll::-webkit-scrollbar{width:4px}
-        .custom-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,0.03)}
-        .custom-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:10px}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg-light: rgba(255, 255, 255, 0.28);
+            --glass-bg-dark: rgba(20, 28, 45, 0.55);
+            --glass-border-light: rgba(255, 255, 255, 0.5);
+            --glass-border-dark: rgba(255, 255, 255, 0.12);
+            --text-light-primary: #1e2a3a;
+            --text-light-secondary: #2c3e50;
+            --text-dark-primary: #f0f3fa;
+            --text-dark-secondary: #cbd5e6;
+            --accent-gold: #ffc857;
+            --accent-glow: #ffb347;
+            --btn-bg: rgba(255, 255, 255, 0.2);
+            --btn-hover: rgba(255, 255, 255, 0.35);
+            --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.2);
+            --backdrop-blur: blur(14px) saturate(180%);
+        }
+
+        body {
+            font-family: system-ui, 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(210, 225, 245, 0.7), rgba(170, 195, 230, 0.5)),
+                        repeating-linear-gradient(45deg, rgba(255,255,240,0.02) 0px, rgba(255,255,240,0.02) 2px, transparent 2px, transparent 8px);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(1px);
+        }
+
+        /* 深色模式灵动背景 */
+        body.dark {
+            background: radial-gradient(circle at 70% 30%, rgba(25, 35, 60, 0.9), rgba(10, 15, 30, 0.95)),
+                        repeating-linear-gradient(135deg, rgba(100,120,160,0.08) 0px, rgba(100,120,160,0.08) 1px, transparent 1px, transparent 10px);
+        }
+
+        /* 全局玻璃容器通用样式 */
+        .glass-card {
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 2rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s ease;
+        }
+
+        body.dark .glass-card {
+            background: var(--glass-bg-dark);
+            border-color: var(--glass-border-dark);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .container {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 85px 20px 40px;
+        }
+
+        /* 头部卡片 (灵动玻璃) */
+        .search-header {
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 2rem;
+            padding: 32px 32px 36px;
+            margin-bottom: 28px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s;
+        }
+
+        body.dark .search-header {
+            background: var(--glass-bg-dark);
+            border-color: var(--glass-border-dark);
+        }
+
+        /* 名字渐变核心效果 ✨卡卡的西✨ */
+        .cute-name {
+            display: inline-block;
+            background: linear-gradient(135deg, #FFD966, #FFB347, #FF6A5C, #C84B31);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: shimmer 3s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            color: var(--text-light-primary);
+        }
+
+        body.dark h1 {
+            color: #f1f5ff;
+        }
+
+        h1 .star {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 4px rgba(255,200,100,0.6));
+        }
+
+        .avatar {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            margin: 12px auto 12px;
+            border: 2px solid rgba(255,255,245,0.7);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+            background: rgba(255,255,240,0.3);
+            backdrop-filter: blur(4px);
+        }
+
+        .mail-display {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(6px);
+            padding: 14px 26px;
+            border-radius: 60px;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px auto;
+            display: inline-block;
+            border: 1px solid rgba(255,255,240,0.6);
+            color: var(--text-light-primary);
+            transition: 0.2s;
+        }
+
+        body.dark .mail-display {
+            background: rgba(0, 0, 0, 0.35);
+            border-color: rgba(255,255,255,0.2);
+            color: #eef4ff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            min-width: 128px;
+            padding: 12px 28px;
+            border-radius: 60px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            background: var(--btn-bg);
+            backdrop-filter: blur(4px);
+            color: var(--text-light-primary);
+            font-size: 0.95rem;
+            border: 1px solid rgba(255,255,245,0.5);
+        }
+
+        body.dark .btn {
+            color: #eef2ff;
+            background: rgba(30, 40, 65, 0.6);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .btn-p {
+            background: linear-gradient(105deg, #2c5282, #1e3a5f);
+            color: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        body.dark .btn-p {
+            background: linear-gradient(105deg, #3b6ea0, #1e3c72);
+        }
+
+        .btn:active { transform: scale(0.97); }
+        .btn-p:hover, .btn-s:hover { filter: brightness(1.03); transform: translateY(-2px); }
+
+        /* 收件箱卡片 */
+        .results-container {
+            background: var(--glass-bg-light);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border-light);
+            border-radius: 2rem;
+            padding: 28px 24px;
+            min-height: 360px;
+            box-shadow: var(--shadow-sm);
+        }
+        body.dark .results-container {
+            background: var(--glass-bg-dark);
+            border-color: var(--glass-border-dark);
+        }
+
+        .results-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-light-secondary);
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid #ffb347;
+        }
+        body.dark .results-title {
+            color: var(--text-dark-secondary);
+        }
+
+        .msg-item {
+            background: rgba(245, 248, 255, 0.65);
+            backdrop-filter: blur(2px);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,245,0.5);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        body.dark .msg-item {
+            background: rgba(25, 35, 55, 0.6);
+            border-color: rgba(255,255,255,0.1);
+        }
+        .msg-item:hover {
+            transform: translateY(-3px);
+            border-color: #ffb347;
+            background: rgba(255,250,225,0.7);
+            box-shadow: 0 12px 20px -10px rgba(0,0,0,0.2);
+        }
+        body.dark .msg-item:hover {
+            background: rgba(45, 60, 90, 0.7);
+            border-color: #f0a34b;
+        }
+
+        .msg-meta {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #d97a1c;
+            margin-bottom: 6px;
+        }
+        body.dark .msg-meta { color: #f6ad55; }
+
+        .msg-subject {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text-light-primary);
+        }
+        body.dark .msg-subject { color: #f0f3fc; }
+
+        /* 弹窗玻璃质感 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: rgba(250, 250, 255, 0.92);
+            backdrop-filter: blur(24px);
+            width: 100%;
+            max-width: 680px;
+            height: 85vh;
+            border-radius: 36px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255,255,245,0.8);
+            box-shadow: var(--shadow-lg);
+        }
+        body.dark .modal-content {
+            background: rgba(18, 25, 45, 0.92);
+            border-color: rgba(255,255,245,0.2);
+        }
+        .modal-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        body.dark .modal-header {
+            border-bottom-color: rgba(255,255,255,0.1);
+        }
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            background: #ffffffea;
+            color: #1f2a3e;
+            border-radius: 0 0 32px 32px;
+        }
+        body.dark .modal-body {
+            background: #fefef7;
+            color: #1a2636;
+        }
+        .close-btn {
+            background: rgba(0,0,0,0.08);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: 0.2s;
+        }
+        .close-btn:hover { background: rgba(0,0,0,0.15); }
+
+        /* 主题切换按钮重新设计融入玻璃 */
+        .theme-toggle {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            width: 48px;
+            height: 48px;
+            border-radius: 60px;
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 150;
+            font-size: 1.6rem;
+            transition: 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+        body.dark .theme-toggle {
+            background: var(--glass-bg-dark);
+            border-color: var(--glass-border-dark);
+        }
+
+        @media (max-width: 640px) {
+            .container { padding-top: 70px; }
+            .search-header, .results-container { border-radius: 1.5rem; padding: 24px 18px; }
+            h1 { font-size: 1.8rem; }
+            .mail-display { font-size: 0.85rem; word-break: break-all; max-width: 95%; }
+        }
     </style>
 </head>
 <body>
-<div id="app" class="max-w-3xl mx-auto px-4 py-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="title">✨卡卡的西✨</h1>
-        <div class="text-sm text-gray-500 bg-white/30 px-3 py-1 rounded-full">QQ音乐</div>
-    </div>
 
-    <div class="glass p-5 mb-6">
-        <div class="flex justify-between items-center mb-4">
-            <span class="text-gray-700 text-sm font-semibold">音质</span>
-            <div class="flex gap-2">
-                <button v-for="q in qualities" :key="q.value" @click="currentQuality = q.value; if(currentSong) refreshUrl()"
-                    class="px-4 py-1.5 rounded-full text-sm" :class="currentQuality === q.value ? 'bg-white shadow' : 'bg-white/30'">{{ q.label }}</button>
+    <div class="theme-toggle" id="themeToggle">🌙</div>
+
+    <div class="container">
+        <div class="search-header">
+            <h1>
+                <span class="star">✨</span>
+                <span class="cute-name">卡卡的西</span>
+                <span class="star">✨</span>
+                <span style="font-weight: 500; background: none; -webkit-background-clip: unset; color: inherit;">&nbsp;临时邮箱</span>
+            </h1>
+            <img src="https://mpimg.cn/view.php/f28da3eac8f392e9fa2ba91723b2bf4c.png" class="avatar" alt="avatar">
+            <p style="color: var(--text-light-secondary); font-size: 0.85rem; margin-top: 6px; opacity: 0.9;">📭 阅后即焚 · 灵动隐私 · 瞬发电邮</p>
+            <div id="addr" class="mail-display">⚡ 正在生成炫光邮箱...</div>
+            <div class="btn-group">
+                <button onclick="copyMail()" class="btn btn-s">📋 复制地址</button>
+                <button id="refreshBtn" onclick="resetAndInit()" class="btn btn-p">🔄 更换地址</button>
             </div>
         </div>
-        <div class="relative">
-            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"></i>
-            <input v-model="keyword" @keyup.enter="search" type="text" placeholder="歌曲或歌手" class="search-input">
-        </div>
-        <div class="flex gap-2 mt-4 overflow-x-auto pb-1">
-            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; search()" class="tag whitespace-nowrap">🎤 {{ singer }}</span>
-        </div>
-    </div>
 
-    <div v-if="currentSong" class="glass p-5 mb-6">
-        <div class="flex gap-4">
-            <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl object-cover" @error="currentSong.cover = defaultCover">
-            <div class="flex-1 min-w-0">
-                <div class="text-gray-500 text-xs uppercase">正在播放 · QQ音乐</div>
-                <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.name }}</h2>
-                <p class="text-gray-500 text-sm truncate">{{ currentSong.artist }}</p>
-            </div>
-        </div>
-        <audio ref="audio" controls class="mt-3" @ended="next" @error="onError"></audio>
-        <div class="flex justify-center gap-5 mt-3">
-            <div class="ctrl-btn" @click="prev"><i class="fas fa-backward-step"></i></div>
-            <div class="ctrl-btn play-btn" @click="togglePlay"><i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i></div>
-            <div class="ctrl-btn" @click="next"><i class="fas fa-forward-step"></i></div>
-            <div class="ctrl-btn" @click="cycleMode"><i class="fas" :class="modeIcon" :class="{'text-blue-500': playMode !== 'order'}"></i></div>
-        </div>
-        <div v-if="playError" class="text-amber-600 text-xs text-center mt-2">{{ playError }}</div>
-    </div>
-
-    <div class="glass overflow-hidden">
-        <div class="px-5 py-3 border-b border-white/50 flex justify-between">
-            <span class="text-gray-700 font-semibold">播放列表</span>
-            <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }}首</span>
-        </div>
-        <div ref="listContainer" class="max-h-[500px] overflow-y-auto custom-scroll">
-            <div v-if="loading" class="py-16 text-center"><div class="loader mx-auto"></div><p class="text-gray-500 mt-2">搜索中...</p></div>
-            <div v-else-if="!songs.length && !loading" class="py-16 text-center"><i class="fas fa-music text-gray-400 text-5xl mb-3"></i><p class="text-gray-500">输入关键词开始</p></div>
-            <div v-else>
-                <div v-for="(song, idx) in songs" :key="song.id" @click="play(song, idx)" class="px-5 py-3 flex items-center gap-3 border-b border-white/30 cursor-pointer" :class="{'playing': currentSong && currentSong.id === song.id}">
-                    <div class="text-gray-500 w-7 text-sm">{{ idx+1 }}</div>
-                    <img :src="song.cover" class="w-10 h-10 rounded-lg object-cover" @error="song.cover = defaultCover">
-                    <div class="flex-1 min-w-0">
-                        <div class="text-gray-800 font-medium truncate">{{ song.name }}</div>
-                        <div class="text-gray-500 text-xs truncate">{{ song.artist }}</div>
-                    </div>
-                    <div class="text-gray-400 text-xs hidden sm:block">{{ song.duration }}</div>
-                    <i class="fas fa-play text-gray-400 text-xs"></i>
-                </div>
-                <div class="py-4 text-center">
-                    <button v-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/40 hover:bg-white/60">加载更多</button>
-                    <div v-if="!hasMore && songs.length" class="text-gray-400 text-xs py-2">到底了</div>
-                </div>
+        <div class="results-container">
+            <div class="results-title">📬 实时收件箱 · 仅存当前会话</div>
+            <div id="list">
+                <div style="text-align: center; padding: 60px; color: var(--text-light-secondary);">✨ 玻璃邮箱就绪，等待新邮件飘落 ✨</div>
             </div>
         </div>
     </div>
 
-    <div v-if="msg" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-xl text-white px-5 py-2 rounded-full text-sm z-50">{{ msg }}</div>
-</div>
+    <!-- 邮件详情弹窗 -->
+    <div id="mailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modalSubject" style="font-weight: 700; font-size: 1.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">邮件详情</span>
+                <button class="close-btn" onclick="closeMail()">关闭</button>
+            </div>
+            <div id="modalBody" class="modal-body">✨ 加载信中流光 ✨</div>
+        </div>
+    </div>
 
-<script>
-    const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
-    const PROXY = 'https://proxy.api.030101.xyz/';
-    const proxyPost = (url, data) => axios.post(PROXY + url, data, { headers: { 'User-Agent': 'Mozilla/5.0', 'Content-Type': 'application/json' }, timeout: 15000 }).then(r => r.data);
+    <script>
+        // ---------- 配置 ----------
+        const API_KEY = 'vmail_at6AmSu4dEkuJG4bafc8qhSqBctCMW9q';
+        const PROXY = 'https://proxy.api.030101.xyz/https://vmail.dev/api/v1';
+        let mid = null;
+        let isInitializing = false;
 
-    createApp({
-        setup() {
-            const keyword = ref('');
-            const songs = ref([]);
-            const loading = ref(false);
-            const isLoadingMore = ref(false);
-            const currentSong = ref(null);
-            const playError = ref('');
-            const msg = ref('');
-            const currentQuality = ref('320k');
-            const audio = ref(null);
-            const isPlaying = ref(false);
-            const playMode = ref('order');
-            const currentIndex = ref(-1);
-            const currentPage = ref(1);
-            const hasMore = ref(true);
-            const pageSize = 30;
-            const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
-            const qualities = [{ value: '128k', label: '标准' },{ value: '320k', label: '高品质' },{ value: 'flac', label: '无损' }];
-            const hotSingers = ['周杰伦', '林俊杰', '陈奕迅', '邓紫棋', '薛之谦', '李荣浩', '林忆莲', '王菲'];
-            const listContainer = ref(null);
-            
-            const modeIcon = computed(() => playMode.value === 'random' ? 'fa-random' : playMode.value === 'repeat-one' ? 'fa-repeat' : 'fa-repeat');
-            const showMsg = (text) => { msg.value = text; setTimeout(() => msg.value = '', 2000); };
-            
-            const updateMediaSession = (song) => {
-                if ('mediaSession' in navigator && song) {
-                    navigator.mediaSession.metadata = new MediaMetadata({ title: song.name, artist: song.artist, artwork: [{ src: song.cover, sizes: '512x512' }] });
-                    navigator.mediaSession.setActionHandler('play', () => audio.value?.play());
-                    navigator.mediaSession.setActionHandler('pause', () => audio.value?.pause());
-                    navigator.mediaSession.setActionHandler('previoustrack', () => prev());
-                    navigator.mediaSession.setActionHandler('nexttrack', () => next());
-                }
-            };
-            
-            // QQ音乐搜索
-            const searchQQ = async (query, page) => {
-                const data = await proxyPost('https://u.y.qq.com/cgi-bin/musicu.fcg', {
-                    req_1: { method: "DoSearchForQQMusicDesktop", module: "music.search.SearchCgiService", param: { num_per_page: pageSize, page_num: page, query, search_type: 0 } }
+        // ---------- 主题切换 玻璃质感适应 ----------
+        const themeBtn = document.getElementById('themeToggle');
+        themeBtn.onclick = () => {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            themeBtn.textContent = isDark ? '☀️' : '🌙';
+        };
+
+        // ---------- 初始化邮箱 (生成新地址) ----------
+        async function init(retries = 3) {
+            if (isInitializing && retries === 3) return;
+            isInitializing = true;
+            const addrEl = document.getElementById('addr');
+            const listEl = document.getElementById('list');
+            addrEl.innerText = "🌀 灵动生成中...";
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const r = await fetch(`${PROXY}/mailboxes`, {
+                    method: 'POST',
+                    headers: { 'X-API-Key': API_KEY, 'Content-Type': 'application/json' },
+                    signal: controller.signal
                 });
-                const list = data?.req_1?.data?.body?.song?.list || [];
-                return {
-                    list: list.map(item => ({
-                        id: item.id, mid: item.mid, name: item.name,
-                        artist: item.singer?.map(s => s.name).join(', ') || '未知歌手',
-                        cover: item.album?.mid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${item.album.mid}.jpg` : defaultCover,
-                        duration: item.interval ? `${Math.floor(item.interval/60)}:${String(item.interval%60).padStart(2,'0')}` : '03:30'
-                    })),
-                    hasMore: list.length === pageSize
-                };
-            };
-            
-            // 新的播放链接获取接口（使用 uomg 备用）
-            const getQQMusicUrl = async (mid, quality) => {
-                const qualityMap = { '128k': '128k', '320k': '320k', 'flac': 'flac' };
-                const br = qualityMap[quality] || '320k';
-                // 使用 uomg 接口（稳定）
-                const api = `https://api.uomg.com/api/qqmusic?mid=${mid}&br=${br}`;
-                try {
-                    const res = await axios.get(api, { timeout: 10000 });
-                    if (res.data && res.data.code === 1 && res.data.data && res.data.data.url) {
-                        return res.data.data.url;
-                    }
-                } catch (e) {}
-                // 备用：另一个接口
-                try {
-                    const backup = `https://api.66mz8.com/api/qq.php?mid=${mid}&br=${br}`;
-                    const res2 = await axios.get(backup, { timeout: 8000 });
-                    if (res2.data && res2.data.url) return res2.data.url;
-                } catch (e) {}
-                // 最后降级到原来的接口（可能失效）
-                const level = quality === '128k' ? 'standard' : quality === '320k' ? 'exhigh' : 'lossless';
-                return `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&level=${level}&type=mp3`;
-            };
-            
-            const playTrack = async (song, idx) => {
-                if (!song) return;
-                currentSong.value = song;
-                currentIndex.value = idx;
-                playError.value = '';
-                updateMediaSession(song);
-                const url = await getQQMusicUrl(song.mid, currentQuality.value);
-                if (audio.value) {
-                    audio.value.src = url;
-                    audio.value.load();
-                    try {
-                        await audio.value.play();
-                        isPlaying.value = true;
-                    } catch (err) {
-                        playError.value = '播放失败，自动跳过';
-                        showMsg(`⚠️ 无法播放: ${song.name}，跳过`);
-                        setTimeout(() => next(), 100);
-                    }
+                clearTimeout(timeoutId);
+                if (!r.ok) throw new Error(`API响应错误: ${r.status}`);
+                const { data } = await r.json();
+                mid = data.id;
+                addrEl.innerText = data.address;
+                listEl.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-light-secondary);">📨 邮箱已激活，新邮件将实时呈现 ✨</div>';
+                // 生成后立即拉取一次消息
+                refreshInbox();
+            } catch (e) {
+                console.warn(e);
+                if (retries > 0) {
+                    setTimeout(() => init(retries - 1), 1200);
+                } else {
+                    addrEl.innerText = "⚠️ 生成失败，请点击「更换地址」重试";
+                    isInitializing = false;
                 }
-                showMsg(`🎵 ${song.name}`);
-            };
-            
-            const getNextIndex = () => {
-                if (!songs.value.length) return -1;
-                if (playMode.value === 'random') {
-                    let newIdx = Math.floor(Math.random() * songs.value.length);
-                    while (newIdx === currentIndex.value && songs.value.length > 1) newIdx = Math.floor(Math.random() * songs.value.length);
-                    return newIdx;
-                } else if (playMode.value === 'repeat-one') return currentIndex.value;
-                return (currentIndex.value + 1) % songs.value.length;
-            };
-            
-            const next = async () => {
-                if (!songs.value.length) return;
-                if (playMode.value === 'repeat-one') {
-                    if (audio.value && currentSong.value) { audio.value.currentTime = 0; audio.value.play(); }
+            } finally {
+                if (mid) isInitializing = false;
+            }
+        }
+
+        // 更换地址专用（强制全新邮箱）
+        async function resetAndInit() {
+            if (isInitializing) return;
+            mid = null;
+            await init(3);
+        }
+
+        // 刷新收件箱 (基于当前mid)
+        async function refreshInbox() {
+            if (!mid || isInitializing) return;
+            try {
+                const r = await fetch(`${PROXY}/mailboxes/${mid}/messages`, {
+                    headers: { 'X-API-Key': API_KEY }
+                });
+                if (!r.ok) return;
+                const { data } = await r.json();
+                const box = document.getElementById('list');
+                if (!data || data.length === 0) {
+                    if (box.innerHTML.includes('msg-item')) return;
+                    box.innerHTML = '<div style="text-align: center; padding: 60px; color: var(--text-light-secondary);">💌 暂无邮件，新邮件会立刻出现 ✨</div>';
                     return;
                 }
-                const idx = getNextIndex();
-                if (idx !== -1) await playTrack(songs.value[idx], idx);
-            };
-            
-            const prev = async () => {
-                if (!songs.value.length) return;
-                let idx;
-                if (playMode.value === 'random') idx = Math.floor(Math.random() * songs.value.length);
-                else if (playMode.value === 'repeat-one') idx = currentIndex.value;
-                else idx = (currentIndex.value - 1 + songs.value.length) % songs.value.length;
-                if (idx !== -1) await playTrack(songs.value[idx], idx);
-            };
-            
-            const onError = () => { showMsg('播放出错，跳过'); next(); };
-            const togglePlay = () => {
-                if (!audio.value) return;
-                if (isPlaying.value) audio.value.pause();
-                else audio.value.play();
-            };
-            const refreshUrl = async () => {
-                if (currentSong.value) {
-                    const url = await getQQMusicUrl(currentSong.value.mid, currentQuality.value);
-                    if (audio.value) {
-                        const wasPlaying = !audio.value.paused;
-                        audio.value.src = url;
-                        audio.value.load();
-                        if (wasPlaying) audio.value.play();
-                    }
-                }
-            };
-            const cycleMode = () => {
-                if (playMode.value === 'order') playMode.value = 'random';
-                else if (playMode.value === 'random') playMode.value = 'repeat-one';
-                else playMode.value = 'order';
-                showMsg(`模式: ${playMode.value === 'order' ? '顺序' : playMode.value === 'random' ? '随机' : '单曲循环'}`);
-            };
-            const play = (song, idx) => playTrack(song, idx);
-            
-            const search = async () => {
-                if (!keyword.value.trim()) { showMsg('输入歌手或歌曲'); return; }
-                loading.value = true;
-                currentPage.value = 1;
-                songs.value = [];
-                try {
-                    const { list, hasMore: more } = await searchQQ(keyword.value, 1);
-                    songs.value = list;
-                    hasMore.value = more;
-                    showMsg(list.length ? `找到 ${list.length} 首` : '未找到');
-                    if (list.length) currentPage.value = 2;
-                } catch(e) { showMsg('搜索失败'); }
-                loading.value = false;
-            };
-            
-            const loadMore = async () => {
-                if (isLoadingMore.value || !hasMore.value || loading.value) return;
-                isLoadingMore.value = true;
-                try {
-                    const { list, hasMore: more } = await searchQQ(keyword.value, currentPage.value);
-                    songs.value = [...songs.value, ...list];
-                    hasMore.value = more;
-                    if (list.length) currentPage.value++;
-                } catch(e) { showMsg('加载更多失败'); }
-                isLoadingMore.value = false;
-            };
-            
-            const handleScroll = () => {
-                if (!listContainer.value) return;
-                const { scrollTop, clientHeight, scrollHeight } = listContainer.value;
-                if (scrollTop + clientHeight >= scrollHeight - 100 && hasMore.value && !isLoadingMore.value && !loading.value && keyword.value.trim())
-                    loadMore();
-            };
-            
-            onMounted(() => {
-                if (listContainer.value) listContainer.value.addEventListener('scroll', handleScroll);
-                if (audio.value) {
-                    audio.value.addEventListener('play', () => isPlaying.value = true);
-                    audio.value.addEventListener('pause', () => isPlaying.value = false);
-                }
-            });
-            onUnmounted(() => {
-                if (listContainer.value) listContainer.value.removeEventListener('scroll', handleScroll);
-            });
-            watch(audio, (val) => {
-                if (val) {
-                    val.addEventListener('play', () => isPlaying.value = true);
-                    val.addEventListener('pause', () => isPlaying.value = false);
-                }
-            });
-            
-            return {
-                keyword, songs, loading, isLoadingMore, currentSong, playError, msg, currentQuality,
-                qualities, defaultCover, hotSingers, hasMore, listContainer, audio, isPlaying,
-                playMode, modeIcon,
-                search, loadMore, play, togglePlay, next, prev, cycleMode, onError, refreshUrl
-            };
+                // 渲染邮件列表
+                box.innerHTML = data.map(m => {
+                    const fromName = m.from?.address || '未知发件人';
+                    const time = m.receivedAt ? new Date(m.receivedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute:'2-digit' }) : '刚刚';
+                    const subject = m.subject || '（无主题）';
+                    const preview = m.preview || (m.text ? m.text.substring(0, 70) : '点击查看完整内容');
+                    return `
+                        <div class="msg-item" onclick="viewMail('${m.id}', '${escapeHtml(subject)}')">
+                            <div class="msg-meta">📧 ${escapeHtml(fromName)} · ${time}</div>
+                            <div class="msg-subject">${escapeHtml(subject)}</div>
+                            <div style="font-size:0.85rem; color: var(--text-light-secondary); margin-top: 8px; opacity:0.8;">${escapeHtml(preview)}…</div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (err) {
+                // 静默失败
+            }
         }
-    }).mount('#app');
-</script>
+
+        // 简单防XSS
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+                return c;
+            });
+        }
+
+        // 查看邮件详情 (modal)
+        async function viewMail(msgId, subject) {
+            if (!mid) {
+                alert('邮箱未就绪，请稍后');
+                return;
+            }
+            const modal = document.getElementById('mailModal');
+            const modalBody = document.getElementById('modalBody');
+            const modalSub = document.getElementById('modalSubject');
+            modalSub.innerText = subject || '无主题邮件';
+            modalBody.innerHTML = '<div style="text-align:center;padding:50px;">📡 解密邮件内容中 ...</div>';
+            modal.style.display = 'flex';
+
+            try {
+                const r = await fetch(`${PROXY}/mailboxes/${mid}/messages/${msgId}`, {
+                    headers: { 'X-API-Key': API_KEY }
+                });
+                if (!r.ok) throw new Error('获取详情失败');
+                const { data } = await r.json();
+                // 优先html，否则纯文本自动换行
+                if (data.html) {
+                    modalBody.innerHTML = data.html;
+                } else if (data.text) {
+                    modalBody.innerHTML = `<div style="white-space: pre-wrap; font-family: inherit; line-height: 1.5;">${escapeHtml(data.text)}</div>`;
+                } else {
+                    modalBody.innerHTML = '<div style="padding: 20px; text-align:center;">✨ 邮件正文为空 ✨</div>';
+                }
+            } catch (e) {
+                modalBody.innerHTML = '<div style="color:#c00; padding:20px;">❌ 加载失败，可能已被删除或网络波动，请刷新重试。</div>';
+            }
+        }
+
+        function closeMail() {
+            document.getElementById('mailModal').style.display = 'none';
+        }
+
+        // 复制邮箱地址
+        function copyMail() {
+            const addrText = document.getElementById('addr').innerText;
+            if (addrText && addrText.includes('@')) {
+                navigator.clipboard.writeText(addrText).then(() => {
+                    alert('✨ 地址已复制 ✨\n注意：刷新页面后地址将永久失效，请及时使用');
+                }).catch(() => alert('手动复制一下叭 ~'));
+            } else {
+                alert('邮箱尚未生成，请稍等或点击「更换地址」');
+            }
+        }
+
+        // 监听新邮件（每4.5秒轮询一次，玻璃感动态）
+        let pollingInterval = null;
+
+        function startPolling() {
+            if (pollingInterval) clearInterval(pollingInterval);
+            pollingInterval = setInterval(() => {
+                refreshInbox();
+            }, 4500);
+        }
+
+        // 页面关闭或重置时清理无用旧mid资源（但无需额外操作）
+        window.addEventListener('DOMContentLoaded', async () => {
+            await init(3);
+            startPolling();
+            // 添加点击背景等优雅行为，避免任何音乐残留
+        });
+
+        // 若重新生成地址时，重置轮询无需重启，继续使用新mid刷新
+        window.resetAndInit = resetAndInit;
+        // 暴露全局方法便于按钮调用
+        window.copyMail = copyMail;
+        window.viewMail = viewMail;
+        window.closeMail = closeMail;
+        window.init = init;    // 以防万一
+        // 优雅处理异常，不残留任何音乐代码
+    </script>
 </body>
 </html>
