@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>卡卡的西 · 双平台音乐</title>
+    <title>卡卡的西 · QQ音乐</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -144,19 +144,13 @@
         @media (max-width: 640px) {
             .title-main { font-size: 2.8rem; }
         }
-        .platform-tab { display: flex; gap: 12px; background: rgba(255,255,255,0.3); border-radius: 40px; padding: 4px; backdrop-filter: blur(4px); }
-        .platform-btn { padding: 6px 24px; border-radius: 40px; font-weight: 500; cursor: pointer; transition: 0.2s; color: #2c3e50; }
-        .platform-active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: #1e2a3a; }
     </style>
 </head>
 <body>
 <div id="app" class="max-w-3xl mx-auto px-5 py-6 md:py-10">
     <div class="mb-8 flex justify-between items-center flex-wrap gap-3">
         <h1 class="title-main">✨ 卡卡的西 ✨</h1>
-        <div class="platform-tab">
-            <div @click="switchPlatform('qq')" class="platform-btn" :class="{'platform-active': platform === 'qq'}">QQ音乐</div>
-            <div @click="switchPlatform('netease')" class="platform-btn" :class="{'platform-active': platform === 'netease'}">网易云</div>
-        </div>
+        <div class="text-sm text-gray-500 bg-white/30 px-3 py-1 rounded-full">QQ音乐</div>
     </div>
 
     <!-- 搜索卡片 -->
@@ -182,7 +176,7 @@
         <div class="flex gap-4">
             <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl shadow-md object-cover" @error="currentSong.cover = defaultCover">
             <div class="flex-1 min-w-0">
-                <div class="text-gray-500 text-xs uppercase">正在播放 · {{ platform === 'qq' ? 'QQ音乐' : '网易云' }}</div>
+                <div class="text-gray-500 text-xs uppercase">正在播放 · QQ音乐</div>
                 <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.name }}</h2>
                 <p class="text-gray-500 text-sm truncate">{{ currentSong.artist }}</p>
             </div>
@@ -200,7 +194,7 @@
     <!-- 歌曲列表 -->
     <div class="glass-premium overflow-hidden">
         <div class="px-5 py-3 border-b border-white/50 flex justify-between">
-            <span class="text-gray-700 font-semibold">{{ platform === 'qq' ? 'QQ音乐' : '网易云' }} · 播放列表</span>
+            <span class="text-gray-700 font-semibold">QQ音乐 · 播放列表</span>
             <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }} 首</span>
         </div>
         <div ref="listContainer" class="max-h-[500px] overflow-y-auto custom-scroll">
@@ -231,6 +225,7 @@
 
 <script>
     const { createApp, ref, onMounted, onUnmounted, watch, computed } = Vue;
+    // CORS 代理，用于解决跨域问题
     const PROXY = 'https://proxy.api.030101.xyz/';
     const proxyPost = async (url, data, headers = {}) => {
         const res = await axios.post(PROXY + url, data, {
@@ -239,19 +234,9 @@
         });
         return res.data;
     };
-    const proxyGet = async (url, params = {}) => {
-        const query = new URLSearchParams(params).toString();
-        const fullUrl = query ? url + '?' + query : url;
-        const res = await axios.get(PROXY + fullUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0' },
-            timeout: 15000
-        });
-        return res.data;
-    };
 
     createApp({
         setup() {
-            const platform = ref('qq');
             const keyword = ref('');
             const songs = ref([]);
             const loading = ref(false);
@@ -295,7 +280,7 @@
                 }
             };
             
-            // ========== QQ音乐（从小秋插件提取）==========
+            // ========== QQ音乐（搜索和播放）==========
             const searchQQ = async (query, page) => {
                 const postData = {
                     req_1: {
@@ -317,8 +302,7 @@
                     name: item.name,
                     artist: item.singer?.map(s => s.name).join(', ') || '未知歌手',
                     cover: item.album?.mid ? `https://y.gtimg.cn/music/photo_new/T002R300x300M000${item.album.mid}.jpg` : defaultCover,
-                    duration: item.interval ? `${Math.floor(item.interval/60)}:${String(item.interval%60).padStart(2,'0')}` : '03:30',
-                    platform: 'qq'
+                    duration: item.interval ? `${Math.floor(item.interval/60)}:${String(item.interval%60).padStart(2,'0')}` : '03:30'
                 }));
                 return { list: formatted, hasMore: songList.length === pageSize };
             };
@@ -329,45 +313,6 @@
                 return `https://music.nxinxz.com/kgqq/tx.php?id=${mid}&level=${level}&type=mp3`;
             };
             
-            // ========== 网易云音乐 ==========
-            const searchNetease = async (query, page) => {
-                const offset = (page - 1) * pageSize;
-                const url = `https://music.163.com/api/search/get/?s=${encodeURIComponent(query)}&type=1&offset=${offset}&limit=${pageSize}`;
-                const res = await proxyGet(url);
-                const songsList = res?.result?.songs || [];
-                return {
-                    list: songsList.map(song => ({
-                        id: song.id,
-                        mid: song.id,
-                        name: song.name,
-                        artist: song.artists?.map(a => a.name).join(', ') || '未知歌手',
-                        cover: song.album?.picUrl || defaultCover,
-                        duration: song.duration ? `${Math.floor(song.duration/60000)}:${String(Math.floor((song.duration%60000)/1000)).padStart(2,'0')}` : '03:30',
-                        platform: 'netease'
-                    })),
-                    hasMore: songsList.length === pageSize
-                };
-            };
-            
-            const getNeteaseUrl = async (id) => {
-                const apis = [
-                    `https://api.66mz8.com/api/163.php?url=https://music.163.com/song?id=${id}`,
-                    `https://api.injahow.cn/music/?type=netease&id=${id}`
-                ];
-                for (const api of apis) {
-                    try {
-                        const res = await axios.get(api, { timeout: 10000 });
-                        let url = res.data?.data?.url || res.data?.url;
-                        if (url && !url.includes('music.163.com/song/media/outer/url')) return url;
-                    } catch (e) {}
-                }
-                return `https://music.163.com/song/media/outer/url?id=${id}.mp3`;
-            };
-            
-            // 统一搜索分发
-            const searchPlatform = (query, page) => platform.value === 'qq' ? searchQQ(query, page) : searchNetease(query, page);
-            const getPlayUrl = (song) => song.platform === 'qq' ? getQQUrl(song.mid) : getNeteaseUrl(song.id);
-            
             // 播放核心
             const playTrack = async (song, index) => {
                 if (!song) return;
@@ -375,7 +320,7 @@
                 currentIndex.value = index;
                 playError.value = '';
                 updateMediaSession(song);
-                const url = await getPlayUrl(song);
+                const url = getQQUrl(song.mid);
                 if (audio.value) {
                     audio.value.src = url;
                     audio.value.load();
@@ -444,7 +389,7 @@
             };
             const refreshUrl = async () => {
                 if (currentSong.value) {
-                    const url = await getPlayUrl(currentSong.value);
+                    const url = getQQUrl(currentSong.value.mid);
                     if (audio.value) {
                         const wasPlaying = !audio.value.paused;
                         audio.value.src = url;
@@ -471,7 +416,7 @@
                 currentSong.value = null;
                 if (audio.value) audio.value.pause();
                 try {
-                    const { list, hasMore: more } = await searchPlatform(keyword.value, 1);
+                    const { list, hasMore: more } = await searchQQ(keyword.value, 1);
                     songs.value = list;
                     hasMore.value = more;
                     if (list.length === 0) showMsg('未找到歌曲');
@@ -489,7 +434,7 @@
                 if (isLoadingMore.value || !hasMore.value || loading.value) return;
                 isLoadingMore.value = true;
                 try {
-                    const { list, hasMore: more } = await searchPlatform(keyword.value, currentPage.value);
+                    const { list, hasMore: more } = await searchQQ(keyword.value, currentPage.value);
                     songs.value = [...songs.value, ...list];
                     hasMore.value = more;
                     if (list.length) currentPage.value++;
@@ -498,16 +443,6 @@
                 } finally {
                     isLoadingMore.value = false;
                 }
-            };
-            
-            const switchPlatform = (plat) => {
-                if (platform.value === plat) return;
-                platform.value = plat;
-                songs.value = [];
-                currentSong.value = null;
-                if (audio.value) audio.value.pause();
-                keyword.value = '';
-                showMsg(`已切换到${plat === 'qq' ? 'QQ音乐' : '网易云'}`);
             };
             
             const handleScroll = () => {
@@ -532,10 +467,10 @@
             watch(audio, (newVal) => { if (newVal) bindEvents(); });
             
             return {
-                platform, keyword, songs, loading, isLoadingMore, currentSong, playError, msg, currentQuality,
+                keyword, songs, loading, isLoadingMore, currentSong, playError, msg, currentQuality,
                 qualities, defaultCover, hotSingers, hasMore, listContainer, audio, isPlaying,
                 playMode, modeIcon,
-                switchPlatform, search, loadMore, playSong, togglePlay, next, prev, cycleMode, onError, refreshUrl
+                search, loadMore, playSong, togglePlay, next, prev, cycleMode, onError, refreshUrl
             };
         }
     }).mount('#app');
