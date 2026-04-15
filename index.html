@@ -3,167 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>卡卡的西 · 终极版</title>
+<title>卡卡的西 · 稳定版</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
-<style>
-body{background:#e8f0ff;font-family:sans-serif}
-.glass{background:rgba(255,255,255,.6);padding:15px;border-radius:20px;margin-bottom:15px}
-.song{padding:10px;border-bottom:1px solid #eee;cursor:pointer}
-.song:hover{background:#f5f7ff}
-</style>
 </head>
 
-<body>
+<body class="bg-blue-50">
+
 <div id="app" class="max-w-xl mx-auto p-4">
 
-<h1 class="text-2xl font-bold mb-4">🎵 卡卡的西（终极版）</h1>
+<h1 class="text-2xl font-bold mb-4">🎵 卡卡的西</h1>
 
-<div class="glass">
 <input v-model="keyword" @keyup.enter="searchMusic"
-placeholder="搜索歌曲"
-class="w-full p-2 rounded border">
+class="w-full p-3 rounded mb-4"
+placeholder="搜索歌曲或歌手">
+
+<div v-if="currentSong" class="bg-white p-4 rounded mb-4">
+<h2 class="font-bold">{{currentSong.name}}</h2>
+<p class="text-sm text-gray-500">{{currentSong.artist}}</p>
+<audio ref="audioPlayer" controls class="w-full mt-2"></audio>
 </div>
 
-<div class="glass" v-if="currentSong">
-<h2>{{currentSong.name}}</h2>
-<p>{{currentSong.artist}}</p>
-<audio ref="audio" controls class="w-full mt-2"></audio>
-</div>
-
-<div class="glass">
-<div v-for="(s,i) in songs" :key="i" class="song" @click="play(s)">
-{{s.name}} - {{s.artist}}
+<div class="bg-white rounded">
+<div v-for="(song,i) in songs" :key="song.id"
+class="p-3 border-b cursor-pointer"
+@click="playSong(song)">
+{{song.name}} - {{song.artist}}
 </div>
 </div>
 
 </div>
 
 <script>
-const {createApp,ref} = Vue;
+const { createApp, ref } = Vue;
 
 createApp({
 setup(){
 
-const keyword=ref('');
-const songs=ref([]);
-const currentSong=ref(null);
-const audio=ref(null);
+const keyword = ref('');
+const songs = ref([]);
+const currentSong = ref(null);
+const audioPlayer = ref(null);
 
 // ✅ 缓存
-const cache=new Map();
+const urlCache = new Map();
 
-// ✅ 音源池
-const SOURCES=[
+// ✅ 播放检测
+const testAudioFast = (url) => {
+    return new Promise((resolve) => {
+        if (!url) return resolve(false);
 
-{
-name:'kuwo',
-handler:async(song)=>{
-try{
-const r=await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord',{
-params:{key:song.name+' '+song.artist,pn:1,rn:1},
-headers:{Referer:'https://www.kuwo.cn/'}
-});
-const s=r.data?.data?.list?.[0];
-if(!s)return null;
+        const audio = new Audio();
+        audio.src = url;
 
-const p=await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl',{
-params:{mid:s.rid},
-headers:{Referer:'https://www.kuwo.cn/'}
-});
-return p.data?.data?.url||null;
-}catch{return null;}
-}
-},
+        let done = false;
+        const finish = (ok) => {
+            if (!done) {
+                done = true;
+                resolve(ok);
+            }
+        };
 
-{
-name:'qq',
-handler:async(song)=>{
-if(!song.mid)return null;
-return `https://music.nxinxz.com/kgqq/tx.php?id=${song.mid}&type=mp3`;
-}
-},
+        audio.oncanplay = () => finish(true);
+        audio.onerror = () => finish(false);
 
-{
-name:'netease',
-handler:async(song)=>{
-return `https://music.163.com/song/media/outer/url?id=186016.mp3`;
-}
-}
-
-];
-
-// ✅ 检测
-const test=(url)=>{
-return new Promise(res=>{
-const a=new Audio();
-a.src=url;
-a.oncanplay=()=>res(true);
-a.onerror=()=>res(false);
-setTimeout(()=>res(false),3000);
-});
+        setTimeout(() => finish(false), 3000);
+    });
 };
 
-// ✅ 核心
-const getUrl=async(song)=>{
+// ✅ 酷我音源
+const getKuwoUrl = async (song) => {
+    try {
+        const res = await axios.get('https://www.kuwo.cn/api/www/search/searchMusicBykeyWord', {
+            params: {
+                key: song.name + ' ' + song.artist,
+                pn: 1,
+                rn: 1
+            },
+            headers: {
+                'Referer': 'https://www.kuwo.cn/',
+                'User-Agent': 'Mozilla/5.0'
+            }
+        });
 
-if(cache.has(song.name)) return cache.get(song.name);
+        const s = res.data?.data?.list?.[0];
+        if (!s) return null;
 
-for(let s of SOURCES){
-let url=await s.handler(song);
-if(!url) continue;
+        const playRes = await axios.get('https://www.kuwo.cn/api/v1/www/music/playUrl', {
+            params: { mid: s.rid },
+            headers: {
+                'Referer': 'https://www.kuwo.cn/'
+            }
+        });
 
-let ok=await test(url);
-if(ok){
-cache.set(song.name,url);
-console.log('使用音源:',s.name);
-return url;
-}
-}
+        return playRes.data?.data?.url || null;
 
-return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    } catch (e) {
+        return null;
+    }
+};
+
+// ✅ 网易兜底
+const getNeteaseFallback = (name) => {
+    const map = {
+        '晴天': '186016',
+        '稻香': '186004',
+        '夜曲': '186038'
+    };
+    for (let k in map) {
+        if (name.includes(k)) {
+            return `https://music.163.com/song/media/outer/url?id=${map[k]}.mp3`;
+        }
+    }
+    return null;
+};
+
+// ✅ 核心音源逻辑（终极版）
+const fetchSongUrl = async (song) => {
+
+    if (urlCache.has(song.id)) {
+        return urlCache.get(song.id);
+    }
+
+    try {
+
+        // 1️⃣ QQ
+        if (song.mid) {
+            const qq = `https://music.nxinxz.com/kgqq/tx.php?id=${song.mid}&type=mp3`;
+            if (await testAudioFast(qq)) {
+                urlCache.set(song.id, qq);
+                return qq;
+            }
+        }
+
+        // 2️⃣ 酷我
+        const kuwo = await getKuwoUrl(song);
+        if (kuwo && await testAudioFast(kuwo)) {
+            urlCache.set(song.id, kuwo);
+            return kuwo;
+        }
+
+        // 3️⃣ 网易
+        const netease = getNeteaseFallback(song.name);
+        if (netease && await testAudioFast(netease)) {
+            urlCache.set(song.id, netease);
+            return netease;
+        }
+
+        // 4️⃣ 保底
+        return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+    } catch {
+        return 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+    }
 };
 
 // ✅ 播放
-const play=async(song)=>{
-currentSong.value=song;
+const playSong = async (song) => {
+    currentSong.value = song;
 
-const url=await getUrl(song);
+    const url = await fetchSongUrl(song);
 
-audio.value.src=url;
-audio.value.play().catch(()=>{
-alert('点击播放');
-});
+    audioPlayer.value.src = url;
+    audioPlayer.value.play().catch(() => {
+        alert('请点击播放按钮');
+    });
 };
 
-// ✅ 搜索（用你原来的QQ搜索）
-const searchMusic=async()=>{
-const res=await axios.post(
-'https://u.y.qq.com/cgi-bin/musicu.fcg',
-{
-req_1:{
-method:"DoSearchForQQMusicDesktop",
-module:"music.search.SearchCgiService",
-param:{query:keyword.value,page_num:1,num_per_page:20}
-}
-}
-);
+// ✅ 搜索（保持你原逻辑）
+const searchMusic = async () => {
 
-const list=res.data?.req_1?.data?.body?.song?.list||[];
+    if (!keyword.value.trim()) return;
 
-songs.value=list.map(i=>({
-name:i.name,
-artist:i.singer.map(s=>s.name).join(','),
-mid:i.mid
-}));
+    const res = await axios.post(
+        'https://u.y.qq.com/cgi-bin/musicu.fcg',
+        {
+            req_1: {
+                method: "DoSearchForQQMusicDesktop",
+                module: "music.search.SearchCgiService",
+                param: {
+                    query: keyword.value,
+                    page_num: 1,
+                    num_per_page: 20
+                }
+            }
+        }
+    );
+
+    const list = res.data?.req_1?.data?.body?.song?.list || [];
+
+    songs.value = list.map(item => ({
+        id: item.id,
+        mid: item.mid,
+        name: item.name,
+        artist: item.singer?.map(s => s.name).join(', ')
+    }));
 };
 
-return{keyword,songs,searchMusic,play,currentSong,audio};
+return {
+    keyword,
+    songs,
+    currentSong,
+    audioPlayer,
+    searchMusic,
+    playSong
+};
 }
 }).mount('#app');
 </script>
+
 </body>
 </html>
