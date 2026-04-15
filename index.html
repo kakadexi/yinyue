@@ -3,696 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>✨卡卡的西全网盘搜 | 夸克资源专搜</title>
+    <title>卡卡的西 · 聚合音乐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-color: #eef2fa;
-            --card-bg: rgba(255, 255, 255, 0.72);
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --text-primary: #1a2c3e;
-            --text-secondary: #3a546d;
-            --border-color: rgba(255, 255, 255, 0.5);
-            --accent-color: #2c6e9e;
-            --accent-hover: #1f5277;
-            --glass-bg: rgba(255, 255, 255, 0.45);
-            --marquee-bg: rgba(255, 255, 255, 0.2);
-            --result-bg: rgba(44, 110, 158, 0.08);
-            --input-bg: rgba(255, 255, 255, 0.55);
-            --tag-bg: rgba(44, 110, 158, 0.12);
-            --password-tag: rgba(255, 193, 7, 0.2);
-            --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
-            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
-            --blur-amount: 12px;
-        }
-
-        body.dark {
-            --bg-color: #0b1120;
-            --card-bg: rgba(18, 25, 45, 0.75);
-            --glass-border: rgba(72, 92, 128, 0.4);
-            --text-primary: #f0f3fa;
-            --text-secondary: #9aaec9;
-            --border-color: rgba(66, 88, 118, 0.5);
-            --accent-color: #6aa9ff;
-            --accent-hover: #4c8de0;
-            --glass-bg: rgba(0, 0, 0, 0.38);
-            --result-bg: rgba(106, 169, 255, 0.12);
-            --input-bg: rgba(30, 41, 59, 0.7);
-            --tag-bg: rgba(106, 169, 255, 0.2);
-            --password-tag: rgba(245, 158, 11, 0.25);
-            --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.3);
-            --shadow-lg: 0 20px 35px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: var(--bg-color);
-            color: var(--text-primary);
-            min-height: 100vh;
-            transition: background 0.3s, color 0.2s;
-            backdrop-filter: blur(0px);
-        }
-
-        /* 灵动玻璃质感 - 全局背景透光 */
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 20px;
-            padding-top: 100px;
-        }
-
-        /* 玻璃质感头部 */
-        .search-header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(var(--blur-amount));
-            -webkit-backdrop-filter: blur(var(--blur-amount));
-            border-radius: 48px;
-            padding: 36px 40px;
-            margin-bottom: 36px;
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .search-header:hover {
-            box-shadow: var(--shadow-lg);
-            border-color: rgba(106, 169, 255, 0.5);
-        }
-
-        h1 {
-            font-size: 2.4rem;
-            font-weight: 800;
-            margin: 0 0 12px 0;
-            background: linear-gradient(135deg, #3b82f6, #a855f7, #f97316, #3b82f6);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 8s ease infinite;
-            letter-spacing: -0.01em;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .avatar-wrapper {
-            display: flex;
-            justify-content: center;
-            margin: 12px 0 20px 0;
-        }
-
-        .avatar {
-            width: 84px;
-            height: 84px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid rgba(255,255,255,0.7);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            transition: transform 0.25s, box-shadow 0.3s;
-            cursor: pointer;
-            background: var(--card-bg);
-        }
-
-        .avatar:hover {
-            transform: scale(1.04);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.2);
-            border-color: var(--accent-color);
-        }
-
-        .sub {
-            color: var(--text-secondary);
-            margin-bottom: 28px;
-            font-size: 1rem;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 300px;
-            padding: 16px 24px;
-            font-size: 1.05rem;
-            border: 1px solid var(--border-color);
-            border-radius: 80px;
-            background: var(--input-bg);
-            backdrop-filter: blur(4px);
-            color: var(--text-primary);
-            outline: none;
-            transition: all 0.25s;
-            font-weight: 500;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 4px rgba(106, 169, 255, 0.25);
-            background: rgba(255,255,255,0.7);
-        }
-
-        body.dark .search-input:focus {
-            background: rgba(30, 41, 59, 0.9);
-        }
-
-        .search-btn {
-            min-width: 140px;
-            background: linear-gradient(105deg, var(--accent-color), #3b6ea0);
-            color: white;
-            border: none;
-            border-radius: 80px;
-            padding: 0 32px;
-            font-size: 1.05rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .search-btn:hover {
-            background: var(--accent-hover);
-            transform: scale(0.97);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .stats {
-            margin-top: 24px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            background: var(--result-bg);
-            backdrop-filter: blur(8px);
-            padding: 8px 24px;
-            border-radius: 60px;
-            display: inline-block;
-            font-weight: 500;
-            border: 0.5px solid var(--glass-border);
-        }
-
-        /* 灵动玻璃卡片 */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 28px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 32px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-lg);
-            border-color: rgba(106, 169, 255, 0.5);
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        body.dark .card:hover {
-            background: rgba(30, 41, 59, 0.85);
-        }
-
-        .card-content {
-            padding: 22px 26px;
-        }
-
-        .resource-title {
-            font-weight: 700;
-            font-size: 1.25rem;
-            line-height: 1.4;
-            margin-bottom: 14px;
-            color: var(--text-primary);
-        }
-
-        .meta-info {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 18px;
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            background: var(--tag-bg);
-            backdrop-filter: blur(4px);
-            padding: 5px 14px;
-            border-radius: 40px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .password-badge {
-            background: var(--password-tag);
-            color: #e68a2e;
-            font-weight: 600;
-        }
-
-        .note {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin: 14px 0;
-            background: var(--result-bg);
-            padding: 12px 14px;
-            border-radius: 20px;
-            word-break: break-word;
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .link-btn {
-            display: block;
-            background: linear-gradient(95deg, var(--accent-color), #2c5a82);
-            color: white;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-align: center;
-            margin-top: 16px;
-            transition: 0.2s;
-            letter-spacing: 0.5px;
-        }
-
-        .link-btn:hover {
-            background: var(--accent-hover);
-            transform: scale(0.98);
-        }
-
-        .footer-info {
-            border-top: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.03);
-            padding: 12px 22px;
-            font-size: 0.7rem;
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-secondary);
-        }
-
-        body.dark .footer-info {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .empty-state, .error-state {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 44px;
-            padding: 60px 28px;
-            text-align: center;
-            color: var(--text-secondary);
-            border: 1px solid var(--glass-border);
-            font-size: 1rem;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px;
-            font-size: 1rem;
-            color: var(--accent-color);
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 44px;
-            height: 44px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-color);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* 主题切换按钮玻璃质感 */
-        .theme-toggle {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            width: 48px;
-            height: 48px;
-            border-radius: 60px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            cursor: pointer;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 101;
-            transition: all 0.3s;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.05);
-            background: rgba(106, 169, 255, 0.2);
-        }
-
-        @media (max-width: 640px) {
-            .container { padding: 16px; padding-top: 92px; }
-            .search-header { padding: 28px 20px; border-radius: 32px; }
-            h1 { font-size: 1.7rem; }
-            .search-input { min-width: 100%; }
-            .search-btn { min-width: 100%; padding: 14px; }
-            .results-grid { grid-template-columns: 1fr; gap: 20px; }
-            .theme-toggle { top: 16px; right: 16px; width: 44px; height: 44px; }
-            .avatar { width: 70px; height: 70px; }
-        }
+        *{font-family:Inter,-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif}
+        body{background:linear-gradient(135deg,#e0eafc,#cfdef3);min-height:100vh}
+        .glass{background:rgba(255,255,255,0.45);backdrop-filter:blur(28px);border-radius:36px;border:0.5px solid rgba(255,255,255,0.7)}
+        .ctrl-btn{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.65);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .play-btn{background:#5e9bff;color:#fff}
+        .tag{background:rgba(255,255,255,0.55);border-radius:40px;padding:6px 16px;cursor:pointer}
+        .search-input{background:rgba(255,255,255,0.55);border-radius:40px;padding:12px 20px 12px 48px;width:100%;outline:none}
+        audio{width:100%;border-radius:60px;margin-top:10px}
+        .loader{width:24px;height:24px;border:2px solid rgba(0,0,0,0.1);border-top-color:#5e9bff;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .title{font-size:3rem;font-weight:800;background:linear-gradient(135deg,#1a2a3a,#3a6b9b,#5e9bff);background-clip:text;-webkit-background-clip:text;color:transparent}
+        .playing{background:rgba(94,155,255,0.15);border-left:3px solid #5e9bff}
+        .custom-scroll::-webkit-scrollbar{width:4px}
+        .custom-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,0.03)}
+        .custom-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.2);border-radius:10px}
     </style>
 </head>
 <body>
-    <!-- 跑马灯与音乐组件已完全移除，清爽专注搜索 -->
-    <div class="theme-toggle" id="themeToggle">🌙</div>
-
-    <div class="container">
-        <div class="search-header">
-            <h1>✨卡卡的西✨全网盘搜</h1>
-            <div class="avatar-wrapper">
-                <img src="https://mpimg.cn/view.php/8250a075b9a1a425410ef647221b846c.gif" 
-                     alt="头像" 
-                     class="avatar"
-                     onerror="this.onerror=null; this.src='https://via.placeholder.com/80x80?text=Avatar'">
-            </div>
-            <div class="sub">⚡ 夸克专搜 · 灵动玻璃引擎 · 秒级响应</div>
-            <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="搜夸克网盘资源：短剧 / 电影 / 剧集 / 书籍 / 软件">
-                <button id="searchBtn" class="search-btn">🔍 夸克极速搜</button>
-            </div>
-            <div id="statsArea" class="stats">✨ 只展示夸克网盘资源 · 代理加速中</div>
+<div id="app" class="max-w-3xl mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="title">✨卡卡的西✨</h1>
+        <div class="flex gap-2 bg-white/30 rounded-full p-1">
+            <div @click="switchPlatform('netease')" class="px-4 py-1 rounded-full cursor-pointer" :class="platform === 'netease' ? 'bg-white shadow' : ''">网易云</div>
+            <div @click="switchPlatform('tencent')" class="px-4 py-1 rounded-full cursor-pointer" :class="platform === 'tencent' ? 'bg-white shadow' : ''">QQ音乐</div>
         </div>
+    </div>
 
-        <div id="resultsContainer" class="results-grid">
-            <div class="empty-state">
-                🧊 灵动玻璃 · 夸克网盘专搜<br>
-                ✅ 已过滤其他网盘，仅呈现夸克链接<br>
-                💡 试试搜索「死神来了」「短剧」「蜜语纪」「4K电影」
+    <div class="glass p-5 mb-6">
+        <div class="relative">
+            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"></i>
+            <input v-model="keyword" @keyup.enter="search" type="text" placeholder="歌曲或歌手" class="search-input">
+        </div>
+        <div class="flex gap-2 mt-4 overflow-x-auto pb-1">
+            <span v-for="singer in hotSingers" :key="singer" @click="keyword = singer; search()" class="tag whitespace-nowrap">🎤 {{ singer }}</span>
+        </div>
+    </div>
+
+    <div v-if="currentSong" class="glass p-5 mb-6">
+        <div class="flex gap-4">
+            <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl object-cover" @error="currentSong.cover = defaultCover">
+            <div class="flex-1 min-w-0">
+                <div class="text-gray-500 text-xs uppercase">正在播放 · {{ platform === 'netease' ? '网易云' : 'QQ音乐' }}</div>
+                <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.name }}</h2>
+                <p class="text-gray-500 text-sm truncate">{{ currentSong.artist }}</p>
+            </div>
+        </div>
+        <audio ref="audio" controls class="mt-3" @ended="next" @error="onError"></audio>
+        <div class="flex justify-center gap-5 mt-3">
+            <div class="ctrl-btn" @click="prev"><i class="fas fa-backward-step"></i></div>
+            <div class="ctrl-btn play-btn" @click="togglePlay"><i :class="isPlaying ? 'fas fa-pause' : 'fas fa-play'"></i></div>
+            <div class="ctrl-btn" @click="next"><i class="fas fa-forward-step"></i></div>
+            <div class="ctrl-btn" @click="cycleMode"><i class="fas" :class="modeIcon" :class="{'text-blue-500': playMode !== 'order'}"></i></div>
+        </div>
+        <div v-if="playError" class="text-amber-600 text-xs text-center mt-2">{{ playError }}</div>
+    </div>
+
+    <div class="glass overflow-hidden">
+        <div class="px-5 py-3 border-b border-white/50 flex justify-between">
+            <span class="text-gray-700 font-semibold">{{ platform === 'netease' ? '网易云' : 'QQ音乐' }} · 播放列表</span>
+            <span v-if="songs.length" class="text-gray-500 text-xs">{{ songs.length }}首</span>
+        </div>
+        <div ref="listContainer" class="max-h-[500px] overflow-y-auto custom-scroll">
+            <div v-if="loading" class="py-16 text-center"><div class="loader mx-auto"></div><p class="text-gray-500 mt-2">搜索中...</p></div>
+            <div v-else-if="!songs.length && !loading" class="py-16 text-center"><i class="fas fa-music text-gray-400 text-5xl mb-3"></i><p class="text-gray-500">输入关键词开始</p></div>
+            <div v-else>
+                <div v-for="(song, idx) in songs" :key="song.id" @click="play(song, idx)" class="px-5 py-3 flex items-center gap-3 border-b border-white/30 cursor-pointer" :class="{'playing': currentSong && currentSong.id === song.id}">
+                    <div class="text-gray-500 w-7 text-sm">{{ idx+1 }}</div>
+                    <img :src="song.cover" class="w-10 h-10 rounded-lg object-cover" @error="song.cover = defaultCover">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-gray-800 font-medium truncate">{{ song.name }}</div>
+                        <div class="text-gray-500 text-xs truncate">{{ song.artist }}</div>
+                    </div>
+                    <div class="text-gray-400 text-xs hidden sm:block">{{ song.duration }}</div>
+                    <i class="fas fa-play text-gray-400 text-xs"></i>
+                </div>
+                <div class="py-4 text-center">
+                    <button v-if="hasMore && !loading" @click="loadMore" class="text-gray-500 text-sm py-2 px-4 rounded-full bg-white/40 hover:bg-white/60">加载更多</button>
+                    <div v-if="!hasMore && songs.length" class="text-gray-400 text-xs py-2">到底了</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        (function() {
-            // ---------- 配置 ----------
-            const ORIGIN_API = 'https://so.252035.xyz/api/search?kw=';
-            const PROXY_API = 'https://proxy.api.030101.xyz/';
-            const USE_PROXY = true;
+    <div v-if="msg" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-xl text-white px-5 py-2 rounded-full text-sm z-50">{{ msg }}</div>
+</div>
 
-            function buildApiUrl(keyword) {
-                const encodedKw = encodeURIComponent(keyword);
-                if (USE_PROXY) {
-                    return PROXY_API + ORIGIN_API + encodedKw;
+<script>
+    const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+    // 使用新的 API 基础地址
+    const API_BASE = 'https://music-api.gdstudio.xyz/api.php';
+    // 缓存搜索结果
+    let lastSearchResult = [];
+
+    createApp({
+        setup() {
+            const platform = ref('netease'); // 'netease' or 'tencent'
+            const keyword = ref('');
+            const songs = ref([]);
+            const loading = ref(false);
+            const isLoadingMore = ref(false);
+            const currentSong = ref(null);
+            const playError = ref('');
+            const msg = ref('');
+            const audio = ref(null);
+            const isPlaying = ref(false);
+            const playMode = ref('order');
+            const currentIndex = ref(-1);
+            const currentPage = ref(1);
+            const hasMore = ref(true);
+            const pageSize = 30;
+            const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
+            const hotSingers = ['周杰伦', '林俊杰', '陈奕迅', '邓紫棋', '薛之谦', '李荣浩', '林忆莲', '王菲'];
+            const listContainer = ref(null);
+            
+            const modeIcon = computed(() => playMode.value === 'random' ? 'fa-random' : playMode.value === 'repeat-one' ? 'fa-repeat' : 'fa-repeat');
+            const showMsg = (text) => { msg.value = text; setTimeout(() => msg.value = '', 2000); };
+            
+            const updateMediaSession = (song) => {
+                if ('mediaSession' in navigator && song) {
+                    navigator.mediaSession.metadata = new MediaMetadata({ title: song.name, artist: song.artist, artwork: [{ src: song.cover, sizes: '512x512' }] });
+                    navigator.mediaSession.setActionHandler('play', () => audio.value?.play());
+                    navigator.mediaSession.setActionHandler('pause', () => audio.value?.pause());
+                    navigator.mediaSession.setActionHandler('previoustrack', () => prev());
+                    navigator.mediaSession.setActionHandler('nexttrack', () => next());
                 }
-                return ORIGIN_API + encodedKw;
-            }
-
-            // 缓存原始数据（不过滤，保证性能）
-            const cache = new Map();
-
-            // 夸克网盘判定函数
-            function isQuarkResource(url) {
-                if (!url || typeof url !== 'string') return false;
-                return url.includes('quark.cn') || url.includes('pan.quark.cn');
-            }
-
-            // 过滤出夸克资源
-            function filterQuarkOnly(resourcesArray) {
-                if (!Array.isArray(resourcesArray)) return [];
-                return resourcesArray.filter(item => {
-                    const url = item?.url || '';
-                    return isQuarkResource(url);
-                });
-            }
-
-            async function fetchWithTimeout(url, timeout = 9000, retries = 1) {
-                for (let i = 0; i <= retries; i++) {
+            };
+            
+            // 通用搜索函数
+            const searchMusic = async (query, page, source) => {
+                const url = `${API_BASE}?types=search&source=${source}&name=${encodeURIComponent(query)}&count=${pageSize}&pages=${page}`;
+                const response = await axios.get(url, { timeout: 15000 });
+                // 根据 API 文档，结果在 response.data.result 数组中
+                let result = response.data?.result || [];
+                // 简单去重：防止连续加载时重复
+                if (page === 1) {
+                    lastSearchResult = result;
+                } else {
+                    const newIds = new Set(lastSearchResult.map(s => s.id));
+                    const filteredNew = result.filter(s => !newIds.has(s.id));
+                    lastSearchResult = [...lastSearchResult, ...filteredNew];
+                    result = filteredNew;
+                }
+                // 格式化歌曲数据
+                const formatted = result.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    artist: Array.isArray(item.artist) ? item.artist.join(', ') : (item.artist || '未知歌手'),
+                    cover: item.pic_id ? `https://music-api.gdstudio.xyz/api.php?types=pic&source=${source}&id=${item.pic_id}&size=500` : defaultCover,
+                    duration: item.duration ? `${Math.floor(item.duration/60)}:${String(item.duration%60).padStart(2,'0')}` : '03:30'
+                }));
+                const hasMoreFlag = result.length === pageSize;
+                return { list: formatted, hasMore: hasMoreFlag };
+            };
+            
+            // 通用播放链接获取函数
+            const getMusicUrl = async (source, id, br = 320) => {
+                const url = `${API_BASE}?types=url&source=${source}&id=${id}&br=${br}`;
+                const response = await axios.get(url, { timeout: 15000 });
+                return response.data?.url || null;
+            };
+            
+            const playTrack = async (song, idx) => {
+                if (!song) return;
+                currentSong.value = song;
+                currentIndex.value = idx;
+                playError.value = '';
+                updateMediaSession(song);
+                // 根据平台获取音质参数
+                const br = platform.value === 'netease' ? 320 : 320;
+                const url = await getMusicUrl(platform.value, song.id, br);
+                if (audio.value) {
+                    audio.value.src = url;
+                    audio.value.load();
                     try {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), timeout);
-                        const response = await fetch(url, { 
-                            signal: controller.signal, 
-                            headers: { 'Accept': 'application/json' }
-                        });
-                        clearTimeout(timeoutId);
-                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                        return await response.json();
+                        await audio.value.play();
+                        isPlaying.value = true;
                     } catch (err) {
-                        if (i === retries) throw err;
-                        await new Promise(r => setTimeout(r, 600));
+                        playError.value = '播放失败，自动跳过';
+                        showMsg(`⚠️ 无法播放: ${song.name}，跳过`);
+                        setTimeout(() => next(), 100);
                     }
                 }
-            }
-
-            function formatDate(dateStr) {
-                if (!dateStr || dateStr.startsWith('0001-01-01')) return '时间未知';
-                try {
-                    const date = new Date(dateStr);
-                    if (isNaN(date.getTime())) return dateStr.split('T')[0];
-                    return `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}`;
-                } catch(e) {
-                    return dateStr;
-                }
-            }
-
-            function escapeHtml(str) {
-                if (!str) return '';
-                return str.replace(/[&<>]/g, function(m) {
-                    if (m === '&') return '&amp;';
-                    if (m === '<') return '&lt;';
-                    if (m === '>') return '&gt;';
-                    return m;
-                });
-            }
-
-            function getQuarkBadge() {
-                return '⚛️ 夸克网盘';
-            }
-
-            function renderCard(item) {
-                const title = item.note || '夸克资源';
-                const url = item.url || '#';
-                const password = item.password || '';
-                const source = item.source || '未知来源';
-                const datetime = item.datetime ? formatDate(item.datetime) : '时间未知';
-                const noteDetail = item.note || '';
-                
-                return `
-                    <div class="card">
-                        <div class="card-content">
-                            <div class="resource-title">✨ ${escapeHtml(title)}</div>
-                            <div class="meta-info">
-                                <span class="badge">${getQuarkBadge()}</span>
-                                <span class="badge">📅 ${datetime}</span>
-                                <span class="badge">📡 ${escapeHtml(source)}</span>
-                                ${password ? `<span class="badge password-badge">🔑 提取码: ${escapeHtml(password)}</span>` : ''}
-                            </div>
-                            ${noteDetail && noteDetail !== title ? `<div class="note">📄 ${escapeHtml(noteDetail.substring(0, 200))}${noteDetail.length > 200 ? '…' : ''}</div>` : ''}
-                            <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="link-btn">📂 打开夸克链接 →</a>
-                        </div>
-                        <div class="footer-info">
-                            <span>✨ 夸克专源 · ${escapeHtml(source)}</span>
-                            ${password ? `<span>🔐 密码: ${escapeHtml(password)}</span>` : '<span>🔓 无密码</span>'}
-                        </div>
-                    </div>
-                `;
-            }
-
-            function showLoading() {
-                const container = document.getElementById('resultsContainer');
-                container.innerHTML = `<div class="loading"><div class="spinner"></div><div style="margin-top:14px;">🪄 代理加速·检索夸克资源中</div></div>`;
-            }
-
-            function showError(msg) {
-                const container = document.getElementById('resultsContainer');
-                container.innerHTML = `<div class="error-state">⚠️ 请求失败: ${escapeHtml(msg)}<br><br>💡 提示: 代理服务器可能繁忙，请重试或检查网络<br>🚀 夸克专搜依然为您服务</div>`;
-                const statsArea = document.getElementById('statsArea');
-                if (statsArea) statsArea.innerText = `❌ 请求失败: ${msg}`;
-            }
-
-            function showEmpty(keyword, onlyQuark = true) {
-                const container = document.getElementById('resultsContainer');
-                container.innerHTML = `<div class="empty-state">😞 未找到关于 “${escapeHtml(keyword)}” 的夸克网盘资源<br>✨ 试试其他关键词 (例如: 短剧、死神来了、蜜语纪、4K纪录片)</div>`;
-                const statsArea = document.getElementById('statsArea');
-                statsArea.innerText = `🔍 未找到夸克资源 · 关键词 “${keyword}” 无结果`;
-            }
-
-            function renderQuarkResults(quarkItems, totalOriginalCount, keyword) {
-                const container = document.getElementById('resultsContainer');
-                container.innerHTML = '';
-                if (!quarkItems.length) {
-                    showEmpty(keyword);
+                showMsg(`🎵 ${song.name}`);
+            };
+            
+            const getNextIndex = () => {
+                if (!songs.value.length) return -1;
+                if (playMode.value === 'random') {
+                    let newIdx = Math.floor(Math.random() * songs.value.length);
+                    while (newIdx === currentIndex.value && songs.value.length > 1) newIdx = Math.floor(Math.random() * songs.value.length);
+                    return newIdx;
+                } else if (playMode.value === 'repeat-one') return currentIndex.value;
+                return (currentIndex.value + 1) % songs.value.length;
+            };
+            
+            const next = async () => {
+                if (!songs.value.length) return;
+                if (playMode.value === 'repeat-one') {
+                    if (audio.value && currentSong.value) { audio.value.currentTime = 0; audio.value.play(); }
                     return;
                 }
-                for (let i = 0; i < quarkItems.length; i++) {
-                    container.insertAdjacentHTML('beforeend', renderCard(quarkItems[i]));
-                }
-                const statsDiv = document.getElementById('statsArea');
-                statsDiv.innerHTML = `✅ 夸克专搜 · 找到 ${quarkItems.length} 条夸克网盘资源 · 代理加速已缓存 ✨`;
-                if (quarkItems.length > 25) {
-                    const tip = document.createElement('div');
-                    tip.className = 'stats';
-                    tip.style.marginTop = '20px';
-                    tip.style.textAlign = 'center';
-                    tip.style.display = 'block';
-                    tip.innerText = `📦 共展示 ${quarkItems.length} 条高质量夸克资源，点击链接直接获取`;
-                    container.appendChild(tip);
-                }
-            }
-
-            // 核心搜索：过滤夸克
-            async function searchResources(keyword) {
-                if (!keyword || keyword.trim() === '') {
-                    const statsArea = document.getElementById('statsArea');
-                    statsArea.innerText = '⚠️ 请输入要搜索的资源名称（夸克网盘专搜）';
-                    const container = document.getElementById('resultsContainer');
-                    container.innerHTML = `<div class="empty-state">📌 输入电影/剧集/短剧/资料名称，秒级检索夸克网盘</div>`;
-                    return;
-                }
-                const kw = keyword.trim();
-                const statsArea = document.getElementById('statsArea');
-                
-                // 缓存逻辑 (缓存原始全量数据)
-                let rawData = null;
-                let isFromCache = false;
-                if (cache.has(kw)) {
-                    rawData = cache.get(kw);
-                    isFromCache = true;
-                    statsArea.innerHTML = `⚡ 缓存命中 · 正在过滤夸克资源 · 关键词: ${kw}`;
-                } else {
-                    statsArea.innerHTML = `🚀 代理加速请求中 · 夸克专搜: ${kw}`;
-                    showLoading();
-                }
-                
+                const idx = getNextIndex();
+                if (idx !== -1) await playTrack(songs.value[idx], idx);
+            };
+            
+            const prev = async () => {
+                if (!songs.value.length) return;
+                let idx;
+                if (playMode.value === 'random') idx = Math.floor(Math.random() * songs.value.length);
+                else if (playMode.value === 'repeat-one') idx = currentIndex.value;
+                else idx = (currentIndex.value - 1 + songs.value.length) % songs.value.length;
+                if (idx !== -1) await playTrack(songs.value[idx], idx);
+            };
+            
+            const onError = () => { showMsg('播放出错，跳过'); next(); };
+            const togglePlay = () => {
+                if (!audio.value) return;
+                if (isPlaying.value) audio.value.pause();
+                else audio.value.play();
+            };
+            const cycleMode = () => {
+                if (playMode.value === 'order') playMode.value = 'random';
+                else if (playMode.value === 'random') playMode.value = 'repeat-one';
+                else playMode.value = 'order';
+                showMsg(`模式: ${playMode.value === 'order' ? '顺序' : playMode.value === 'random' ? '随机' : '单曲循环'}`);
+            };
+            const play = (song, idx) => playTrack(song, idx);
+            
+            const search = async () => {
+                if (!keyword.value.trim()) { showMsg('输入歌手或歌曲'); return; }
+                loading.value = true;
+                currentPage.value = 1;
+                hasMore.value = true;
+                songs.value = [];
                 try {
-                    let allResultsRaw = [];
-                    let totalOriginal = 0;
-                    
-                    if (!isFromCache) {
-                        const apiUrl = buildApiUrl(kw);
-                        const data = await fetchWithTimeout(apiUrl, 9000, 1);
-                        if (data.code !== 0 || !data.data) {
-                            throw new Error(data.message || '接口返回异常');
-                        }
-                        const mergedByType = data.data.merged_by_type || {};
-                        let tempResults = [];
-                        for (let type in mergedByType) {
-                            if (Array.isArray(mergedByType[type])) {
-                                tempResults = tempResults.concat(mergedByType[type]);
-                            }
-                        }
-                        allResultsRaw = tempResults;
-                        totalOriginal = data.data.total || tempResults.length;
-                        // 存入缓存（原始完整列表）
-                        cache.set(kw, { allResults: allResultsRaw, total: totalOriginal });
-                        if (cache.size > 55) {
-                            const firstKey = cache.keys().next().value;
-                            cache.delete(firstKey);
-                        }
-                    } else {
-                        allResultsRaw = rawData.allResults;
-                        totalOriginal = rawData.total;
-                    }
-                    
-                    // 夸克过滤核心
-                    const quarkOnly = filterQuarkOnly(allResultsRaw);
-                    
-                    if (quarkOnly.length === 0) {
-                        showEmpty(kw);
-                        return;
-                    }
-                    
-                    renderQuarkResults(quarkOnly, totalOriginal, kw);
-                    
-                } catch (err) {
-                    console.error('夸克搜索出错:', err);
-                    if (err.name === 'AbortError') {
-                        showError('请求超时 (9秒)，代理服务器较慢，请重试');
-                    } else {
-                        showError(err.message || '网络波动或代理不可用，稍后重试');
-                    }
-                }
-            }
+                    const { list, hasMore: more } = await searchMusic(keyword.value, 1, platform.value);
+                    songs.value = list;
+                    hasMore.value = more;
+                    showMsg(list.length ? `找到 ${list.length} 首` : '未找到');
+                    if (list.length) currentPage.value = 2;
+                } catch(e) { console.error(e); showMsg('搜索失败'); }
+                loading.value = false;
+            };
             
-            // 预加载热门夸克词 (可选，依然只过滤夸克)
-            function preloadHotKeywords() {
-                const hotWords = ['短剧', '电影', '死神来了', '4K', '夸克资源'];
-                if ('requestIdleCallback' in window) {
-                    requestIdleCallback(() => {
-                        hotWords.forEach(kw => {
-                            if (!cache.has(kw)) {
-                                fetchWithTimeout(buildApiUrl(kw), 10000, 0).catch(() => {});
-                            }
-                        });
-                    });
-                } else {
-                    setTimeout(() => {
-                        hotWords.forEach(kw => {
-                            if (!cache.has(kw)) {
-                                fetchWithTimeout(buildApiUrl(kw), 10000, 0).catch(() => {});
-                            }
-                        });
-                    }, 2000);
-                }
-            }
-
-            // ---------- DOM 绑定 ----------
-            const searchInput = document.getElementById('searchInput');
-            const searchBtn = document.getElementById('searchBtn');
+            const loadMore = async () => {
+                if (isLoadingMore.value || !hasMore.value || loading.value) return;
+                isLoadingMore.value = true;
+                try {
+                    const { list, hasMore: more } = await searchMusic(keyword.value, currentPage.value, platform.value);
+                    songs.value = [...songs.value, ...list];
+                    hasMore.value = more;
+                    if (list.length) currentPage.value++;
+                } catch(e) { showMsg('加载更多失败'); }
+                isLoadingMore.value = false;
+            };
             
-            searchBtn.addEventListener('click', () => {
-                searchResources(searchInput.value);
-            });
-            searchInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    searchResources(searchInput.value);
+            const switchPlatform = (plat) => {
+                if (platform.value === plat) return;
+                platform.value = plat;
+                songs.value = [];
+                currentSong.value = null;
+                if (audio.value) audio.value.pause();
+                keyword.value = '';
+                showMsg(`已切换到${plat === 'netease' ? '网易云' : 'QQ音乐'}`);
+            };
+            
+            const handleScroll = () => {
+                if (!listContainer.value) return;
+                const { scrollTop, clientHeight, scrollHeight } = listContainer.value;
+                if (scrollTop + clientHeight >= scrollHeight - 100 && hasMore.value && !isLoadingMore.value && !loading.value && keyword.value.trim())
+                    loadMore();
+            };
+            
+            onMounted(() => {
+                if (listContainer.value) listContainer.value.addEventListener('scroll', handleScroll);
+                if (audio.value) {
+                    audio.value.addEventListener('play', () => isPlaying.value = true);
+                    audio.value.addEventListener('pause', () => isPlaying.value = false);
                 }
             });
-
-            // 主题切换 (保持玻璃质感)
-            const themeToggle = document.getElementById('themeToggle');
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark');
-                themeToggle.textContent = '☀️';
-            }
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                themeToggle.textContent = isDark ? '☀️' : '🌙';
+            onUnmounted(() => {
+                if (listContainer.value) listContainer.value.removeEventListener('scroll', handleScroll);
+            });
+            watch(audio, (val) => {
+                if (val) {
+                    val.addEventListener('play', () => isPlaying.value = true);
+                    val.addEventListener('pause', () => isPlaying.value = false);
+                }
             });
             
-            // 页面启动后预加载热门词 + 默认不再自动播放音乐（已彻底移除音乐组件）
-            window.addEventListener('load', () => {
-                preloadHotKeywords();
-                if (localStorage.getItem('theme') === 'dark') {
-                    document.body.classList.add('dark');
-                    themeToggle.textContent = '☀️';
-                }
-                // 友好的初始提示
-                const statsDiv = document.getElementById('statsArea');
-                statsDiv.innerHTML = '✨ 夸克网盘专搜已就绪 · 灵动玻璃质感 · 输入关键词即得';
-            });
-        })();
-    </script>
+            return {
+                platform, keyword, songs, loading, isLoadingMore, currentSong, playError, msg,
+                defaultCover, hotSingers, hasMore, listContainer, audio, isPlaying,
+                playMode, modeIcon,
+                search, loadMore, play, togglePlay, next, prev, cycleMode, onError, switchPlatform
+            };
+        }
+    }).mount('#app');
+</script>
 </body>
 </html>
