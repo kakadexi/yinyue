@@ -195,10 +195,10 @@
     <!-- 当前播放卡片 -->
     <div v-if="currentSong" class="glass-premium p-5 mb-6">
         <div class="flex gap-4">
-            <img :src="currentSong.cover" class="w-20 h-20 rounded-2xl shadow-md object-cover" @error="currentSong.cover = defaultCover">
+            <img :src="currentSong.artwork" class="w-20 h-20 rounded-2xl shadow-md object-cover" @error="currentSong.artwork = defaultCover">
             <div class="flex-1 min-w-0">
                 <div class="text-gray-500 text-xs uppercase">正在播放 · QQ音乐</div>
-                <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.name }}</h2>
+                <h2 class="text-gray-800 font-semibold text-lg truncate">{{ currentSong.title }}</h2>
                 <p class="text-gray-500 text-sm truncate">{{ currentSong.artist }}</p>
             </div>
         </div>
@@ -225,9 +225,9 @@
             <div v-else>
                 <div v-for="(song, idx) in songs" :key="song.id" @click="play(song, idx)" class="song-row px-5 py-3 flex items-center gap-3 border-b border-white/30" :class="{'playing-highlight': currentSong && currentSong.id === song.id}">
                     <div class="text-gray-500 w-7 text-sm">{{ idx+1 }}</div>
-                    <img :src="song.cover" class="w-10 h-10 rounded-lg object-cover" @error="song.cover = defaultCover">
+                    <img :src="song.artwork" class="w-10 h-10 rounded-lg object-cover" @error="song.artwork = defaultCover">
                     <div class="flex-1 min-w-0">
-                        <div class="text-gray-800 font-medium truncate">{{ song.name }}</div>
+                        <div class="text-gray-800 font-medium truncate">{{ song.title }}</div>
                         <div class="text-gray-500 text-xs truncate">{{ song.artist }}</div>
                     </div>
                     <div class="text-gray-400 text-xs hidden sm:block">{{ song.duration }}</div>
@@ -246,11 +246,66 @@
 
 <script>
     const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
-    // 使用稳定聚合API (支持QQ音乐)
-    const API_BASE = 'https://music-api.gdstudio.xyz/api.php';
-    // 缓存搜索结果用于分页
-    let lastSearchResult = [];
-
+    const PROXY = 'https://proxy.api.030101.xyz/';
+    const urlCache = new Map();
+    const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
+    
+    const headers = {
+        referer: "https://y.qq.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36",
+        Cookie: "uin=",
+    };
+    
+    function formatMusicItem(_) {
+        const albummid = _.album?.mid;
+        return {
+            id: _.id || _.songid,
+            songmid: _.mid || _.songmid,
+            title: _.title || _.songname,
+            artist: _.singer?.map(s => s.name).join(", ") || "未知歌手",
+            artwork: albummid ? `https://y.gtimg.cn/music/photo_new/T002R800x800M000${albummid}.jpg` : defaultCover,
+            duration: _.interval ? `${Math.floor(_.interval/60)}:${String(_.interval%60).padStart(2,'0')}` : '03:30'
+        };
+    }
+    
+    async function searchMusicQuery(query, page) {
+        const postData = {
+            req_1: {
+                method: "DoSearchForQQMusicDesktop",
+                module: "music.search.SearchCgiService",
+                param: {
+                    num_per_page: 25,
+                    page_num: page,
+                    query: query,
+                    search_type: 0,
+                },
+            },
+        };
+        const targetUrl = 'https://u.y.qq.com/cgi-bin/musicu.fcg';
+        const res = await axios.post(PROXY + targetUrl, postData, { headers, timeout: 15000 });
+        const songList = res.data?.req_1?.data?.body?.song?.list || [];
+        return songList.map(formatMusicItem);
+    }
+    
+    async function getPlayUrl(songmid) {
+        if (urlCache.has(songmid)) return urlCache.get(songmid);
+        try {
+            const url = `https://api.xunhuisi.store/API/QQMusic/Song.php?mid=${songmid}`;
+            const response = await axios.get(PROXY + url, {
+                headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://y.qq.com', 'Cookie': 'uin=' },
+                timeout: 10000
+            });
+            if (response.data && response.data.code === 200 && response.data.music_url) {
+                urlCache.set(songmid, response.data.music_url);
+                return response.data.music_url;
+            }
+            return null;
+        } catch (error) {
+            console.error('获取播放链接错误:', error);
+            return null;
+        }
+    }
+    
     createApp({
         setup() {
             const keyword = ref('');
@@ -267,10 +322,9 @@
             const currentIndex = ref(-1);
             const currentPage = ref(1);
             const hasMore = ref(true);
-            const pageSize = 30;
-            const currentQuality = ref('320k'); // 用于音质选择，实际接口可能不支持，保留UI
+            const pageSize = 25;
+            const currentQuality = ref('320k');
             const qualities = [{ value: '128k', label: '标准' },{ value: '320k', label: '高品质' },{ value: 'flac', label: '无损' }];
-            const defaultCover = 'https://y.gtimg.cn/music/photo_new/T002R300x300M000000MkMni19ClKG.jpg';
             const hotSingers = ['周杰伦', '林俊杰', '陈奕迅', '邓紫棋', '薛之谦', '李荣浩', '林忆莲', '王菲'];
             const listContainer = ref(null);
             
@@ -285,47 +339,15 @@
             const updateMediaSession = (song) => {
                 if ('mediaSession' in navigator && song) {
                     navigator.mediaSession.metadata = new MediaMetadata({
-                        title: song.name,
+                        title: song.title,
                         artist: song.artist,
-                        artwork: [{ src: song.cover, sizes: '512x512' }]
+                        artwork: [{ src: song.artwork, sizes: '512x512' }]
                     });
                     navigator.mediaSession.setActionHandler('play', () => audio.value?.play());
                     navigator.mediaSession.setActionHandler('pause', () => audio.value?.pause());
                     navigator.mediaSession.setActionHandler('previoustrack', () => prev());
                     navigator.mediaSession.setActionHandler('nexttrack', () => next());
                 }
-            };
-            
-            // 搜索（QQ音乐）
-            const searchQQ = async (query, page) => {
-                const url = `${API_BASE}?types=search&source=tencent&name=${encodeURIComponent(query)}&count=${pageSize}&pages=${page}`;
-                const response = await axios.get(url, { timeout: 15000 });
-                let result = response.data?.result || [];
-                // 去重（防止加载更多时重复）
-                if (page === 1) {
-                    lastSearchResult = result;
-                } else {
-                    const newIds = new Set(lastSearchResult.map(s => s.id));
-                    const filteredNew = result.filter(s => !newIds.has(s.id));
-                    lastSearchResult = [...lastSearchResult, ...filteredNew];
-                    result = filteredNew;
-                }
-                const formatted = result.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    artist: Array.isArray(item.artist) ? item.artist.join(', ') : (item.artist || '未知歌手'),
-                    cover: item.pic_id ? `https://music-api.gdstudio.xyz/api.php?types=pic&source=tencent&id=${item.pic_id}&size=500` : defaultCover,
-                    duration: item.duration ? `${Math.floor(item.duration/60)}:${String(item.duration%60).padStart(2,'0')}` : '03:30'
-                }));
-                const hasMoreFlag = result.length === pageSize;
-                return { list: formatted, hasMore: hasMoreFlag };
-            };
-            
-            // 获取播放链接
-            const getMusicUrl = async (id, br = 320) => {
-                const url = `${API_BASE}?types=url&source=tencent&id=${id}&br=${br}`;
-                const response = await axios.get(url, { timeout: 10000 });
-                return response.data?.url || null;
             };
             
             // 播放核心
@@ -335,12 +357,7 @@
                 currentIndex.value = idx;
                 playError.value = '';
                 updateMediaSession(song);
-                // 音质参数 br 映射（简单处理）
-                let br = 320;
-                if (currentQuality.value === '128k') br = 128;
-                else if (currentQuality.value === '320k') br = 320;
-                else if (currentQuality.value === 'flac') br = 999; // flac 标识
-                const url = await getMusicUrl(song.id, br);
+                const url = await getPlayUrl(song.songmid);
                 if (url) {
                     currentPlayUrl.value = url;
                     if (audio.value) {
@@ -351,14 +368,14 @@
                             isPlaying.value = true;
                         } catch (err) {
                             playError.value = '播放失败，自动跳过';
-                            showMsg(`⚠️ 无法播放: ${song.name}，跳过`);
+                            showMsg(`⚠️ 无法播放: ${song.title}，跳过`);
                             setTimeout(() => next(), 100);
                         }
                     }
-                    showMsg(`🎵 ${song.name}`);
+                    showMsg(`🎵 ${song.title}`);
                 } else {
                     playError.value = '获取播放链接失败';
-                    showMsg(`⚠️ 无法获取播放链接: ${song.name}`);
+                    showMsg(`⚠️ 无法获取播放链接: ${song.title}`);
                     setTimeout(() => next(), 100);
                 }
             };
@@ -404,7 +421,7 @@
             const onError = () => {
                 if (currentSong.value) {
                     playError.value = '播放出错，跳过';
-                    showMsg(`⚠️ 播放出错: ${currentSong.value.name}，跳过`);
+                    showMsg(`⚠️ 播放出错: ${currentSong.value.title}，跳过`);
                     next();
                 }
             };
@@ -415,11 +432,7 @@
             };
             const refreshUrl = async () => {
                 if (currentSong.value) {
-                    let br = 320;
-                    if (currentQuality.value === '128k') br = 128;
-                    else if (currentQuality.value === '320k') br = 320;
-                    else br = 999;
-                    const url = await getMusicUrl(currentSong.value.id, br);
+                    const url = await getPlayUrl(currentSong.value.songmid);
                     if (url && audio.value) {
                         const wasPlaying = !audio.value.paused;
                         currentPlayUrl.value = url;
@@ -448,11 +461,11 @@
                 currentPlayUrl.value = '';
                 if (audio.value) audio.value.pause();
                 try {
-                    const { list, hasMore: more } = await searchQQ(keyword.value, 1);
-                    songs.value = list;
-                    hasMore.value = more;
-                    showMsg(list.length ? `找到 ${list.length} 首` : '未找到');
-                    if (list.length) currentPage.value = 2;
+                    const results = await searchMusicQuery(keyword.value, 1);
+                    songs.value = results;
+                    hasMore.value = results.length === pageSize;
+                    showMsg(results.length ? `找到 ${results.length} 首` : '未找到');
+                    if (results.length) currentPage.value = 2;
                 } catch(e) { console.error(e); showMsg('搜索失败'); }
                 loading.value = false;
             };
@@ -461,10 +474,14 @@
                 if (isLoadingMore.value || !hasMore.value || loading.value) return;
                 isLoadingMore.value = true;
                 try {
-                    const { list, hasMore: more } = await searchQQ(keyword.value, currentPage.value);
-                    songs.value = [...songs.value, ...list];
-                    hasMore.value = more;
-                    if (list.length) currentPage.value++;
+                    const results = await searchMusicQuery(keyword.value, currentPage.value);
+                    if (results.length) {
+                        songs.value = [...songs.value, ...results];
+                        hasMore.value = results.length === pageSize;
+                        currentPage.value++;
+                    } else {
+                        hasMore.value = false;
+                    }
                 } catch(e) { showMsg('加载更多失败'); }
                 isLoadingMore.value = false;
             };
@@ -475,12 +492,12 @@
                     return;
                 }
                 try {
-                    const response = await axios.get(currentPlayUrl.value, { responseType: 'blob', timeout: 30000 });
+                    const response = await axios.get(PROXY + currentPlayUrl.value, { responseType: 'blob', timeout: 30000 });
                     const blob = new Blob([response.data], { type: 'audio/mpeg' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `${currentSong.value.name} - ${currentSong.value.artist}.mp3`;
+                    a.download = `${currentSong.value.title} - ${currentSong.value.artist}.mp3`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
